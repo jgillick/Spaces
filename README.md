@@ -20,12 +20,22 @@ This is a work in progress, so check back soon.
  * Automatically flag out-of-date content and promote recent or popular content.
  * Customizable.
 
-## What does wiki-like mean?
+## What does wiki*-like* mean?
 
 This is a wiki-like system, in that anyone with access should be able to create 
 new documents and edit existing ones. Where this differs is that it does not rely 
 on any wiki markup to write the documentation. Just simple, WYSIWYG tools that 
 let you type as if you were in your favorite word processor.
+
+Plus instead of a flat system of documents, this can have hierarchy and separate 
+isolated areas.
+
+## Why is it called Spaces?
+
+The name comes from a primary goal of being able to create separate content areas, or spaces. 
+For example, your company might have the following spaces: Engineering, Design, Product, HR.
+Under each space you can have full hierarchies of documents, organized any way you like.
+Then users can search under specific space for the content they need. 
 
 ## Framework
 
