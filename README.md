@@ -14,8 +14,8 @@ This is a work in progress, so check back soon.
 
 ## Goals
 
- * Easy & intuitive to use by everyone (not just developers).
- * Able to create separate content areas (i.e. Engineering, Design, Product).
+ * Easy & intuitive for everyone -- not just developers.
+ * Able to create separate searchable content areas (i.e. Engineering, Design, Product).
  * Search that works.
  * Automatically flag out-of-date content and promote recent or popular content.
  * Customizable.
