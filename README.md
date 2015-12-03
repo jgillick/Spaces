@@ -50,8 +50,6 @@ Install Vagrant, and then run these steps:
 ```sh
 vagrant up
 
-vagrant provision
-
 vagrant ssh
 
 python /vagrant/manage.py runserver 0.0.0.0:8000
