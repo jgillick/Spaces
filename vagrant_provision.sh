@@ -11,6 +11,7 @@ sudo apt-get install -y mysql-server libmysqlclient-dev
 
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS spaces;"
 mysql -u root -e "GRANT ALL PRIVILEGES ON spaces.* TO 'spaceman'@'localhost'; FLUSH PRIVILEGES;"
+mysql -u root -e "GRANT ALL PRIVILEGES ON test_spaces.* TO 'spaceman'@'localhost'; FLUSH PRIVILEGES;"
 
 # Python libs
 sudo pip install django

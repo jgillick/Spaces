@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Document, Revision, Space
 
 class SpaceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'uri')
+    list_display = ('name', 'path')
 
 
 class RevisionInline(admin.StackedInline):
@@ -18,7 +18,7 @@ class RevisionInline(admin.StackedInline):
 
 
 class DocumentAdmin(admin.ModelAdmin):
-    fields = ['title', 'uri']
+    fields = ['title', 'path']
     inlines = [RevisionInline]
 
     def save_model(self, request, obj, form, change):
