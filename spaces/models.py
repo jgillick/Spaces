@@ -94,9 +94,12 @@ class Document(models.Model):
         if self.path.find('/') > -1:
             path = normalize_path(self.path).split("/")
             parentPath = path[0:-1];
-            parentPath.insert(0, self.space.path)
-            self.parent = Document.objects.get_by_path(parentPath, create=True)
+            
             self.path = path[-1]
+            self.parent = Document.objects.get_by_path(
+                parentPath, 
+                space=self.space, 
+                create=True)
 
         super(Document, self).clean(*args, **kwargs)
 

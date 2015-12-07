@@ -10,13 +10,15 @@ from .utils import normalize_path
 class DocumentManager(models.Manager):
     """ Custom document queryset object """ 
 
-    def get_by_path(self, path, create=False):
+    def get_by_path(self, path, space=None, create=False):
         """ 
         Get a document from a full URI path, including space.
         
         Args:
             path: Full path to the document:
                   <space>/<path>/<path>/<path>
+            space: The space the path is under. If not set, the 
+                   first path segment is assumed to be the space
             create: Creates document for path segments
                     that do not exist
         """
@@ -28,11 +30,12 @@ class DocumentManager(models.Manager):
         queryset = self.get_queryset()
 
         # Get space
-        try:
-            space = Space.objects.get(path=path[0])
-            path.pop(0)
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist("The space '%s' does not exist" % path[0])
+        if space is None:
+            try:
+                space = Space.objects.get(path=path[0])
+                path.pop(0)
+            except ObjectDoesNotExist:
+                raise ObjectDoesNotExist("The space '%s' does not exist" % path[0])
 
         # Follow the path
         doc = None
