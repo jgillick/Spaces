@@ -8,9 +8,6 @@ from spaces.models import Space, Document, Revision
 class SpaceTestCase(TestCase):
     """ Test Space Models """
 
-    def setUp(self):
-        pass
-
     def test_root_space_should_be_present(self):
         """ The default application should at least have a __ROOT__ space """
         space = Space.objects.first()
@@ -18,6 +15,9 @@ class SpaceTestCase(TestCase):
 
 
 class DocumentTestCase(TestCase):
+    """ 
+    Test the Document Model 
+    """
 
     def setUp(self):
         self.space = Space.objects.create(name='My Space!', path='mine')
@@ -39,9 +39,9 @@ class DocumentTestCase(TestCase):
         self.doc_root = Document.objects.create(
             title='Root doc', path='hello', space=root)
 
-    def test_create_document_without_space(self):
+    def test_create_document_without_a_space(self):
         """ All documents belong in a space """
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValidationError):
             Document.objects.create(title='Orphan', path='annie')
 
     def test_path_query_finder(self):
@@ -86,7 +86,9 @@ class DocumentTestCase(TestCase):
 
 
 class RevisionTestCase(TestCase):
-    """ Test Document Revision Models """
+    """ 
+    Test Document Revision Models 
+    """
 
     def setUp(self):
         space = Space.objects.get(path='')
