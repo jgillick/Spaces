@@ -2,16 +2,21 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.test import TestCase
 
-from spaces.models import Space, Document, Revision
+from spaces.models import Space, Document, Revision, \
+                          ROOT_SPACE_NAME, USER_SPACE_NAME
 
 
 class SpaceTestCase(TestCase):
     """ Test Space Models """
 
     def test_root_space_should_be_present(self):
-        """ The default application should at least have a __ROOT__ space """
-        space = Space.objects.first()
-        self.assertEqual(space.name, '__ROOT__')
+        """ The default application should have a __ROOT__ space """
+        Space.objects.get(name=ROOT_SPACE_NAME)
+
+    def test_user_space_should_be_present(self):
+        """ The default application should have a __USER__ space """
+        Space.objects.get(name=USER_SPACE_NAME)
+
 
 
 class DocumentTestCase(TestCase):
@@ -22,27 +27,43 @@ class DocumentTestCase(TestCase):
     def setUp(self):
         self.space = Space.objects.create(name='My Space!', path='mine')
 
+        self.user = get_user_model().objects.create_user(
+            username='bob', 
+            email='bob@dobbs.com', 
+            password='noneofyourbusiness')
+
         # Document hierarchy 
         self.doc_foo = Document.objects.create(
-            title='Foo', path='foo', space=self.space)
+            title='Foo', 
+            path='foo', 
+            space=self.space)
         self.doc_bar = Document.objects.create(
-            title='Bar', path='bar', parent=self.doc_foo)
+            title='Bar', 
+            path='bar', 
+            parent=self.doc_foo)
         self.doc_baz = Document.objects.create(
-            title='Baz', path='baz', parent=self.doc_bar)
+            title='Baz', 
+            path='baz', 
+            parent=self.doc_bar)
 
-        # Create hierarchy by URI path
+        # Create hierarchy by full path
         self.doc_uri = Document.objects.create(
-            title='Quick Fox', path='quick/brown/fox', space=self.space)
+            title='Quick Fox', 
+            path='quick/brown/fox', 
+            space=self.space)
 
         # Root document
-        root = Space.objects.get(name='__ROOT__')
+        root = Space.objects.get(name=ROOT_SPACE_NAME)
         self.doc_root = Document.objects.create(
-            title='Root doc', path='hello', space=root)
+            title='Root doc', 
+            path='hello', 
+            space=root)
 
     def test_create_document_without_a_space(self):
         """ All documents belong in a space """
         with self.assertRaises(ValidationError):
-            Document.objects.create(title='Orphan', path='annie')
+            Document.objects.create(
+                title='Orphan', path='annie')
 
     def test_path_query_finder(self):
         """ Find document by full path """
@@ -80,22 +101,26 @@ class DocumentTestCase(TestCase):
                 parent=self.doc_root, 
                 space=self.space)
 
-    def test_create_with_full_uri(self):
+    def test_create_with_full_path(self):
         """ 
-        Create a document with full URI path 
+        Create a document with full path 
         """
         uri = 'foo/bar/baz/boo/foo'
-        doc = Document.objects.create(title='Foo', path=uri, space=self.space)
+        doc = Document.objects.create(
+            title='Foo', path=uri, space=self.space)
 
         self.assertEqual(doc.path, 'foo')
-        self.assertEqual(doc.full_uri(), "%s/%s" % (self.space.path, uri))
+        self.assertEqual(doc.full_path(), "%s/%s" % (self.space.path, uri))
 
     def test_first_doc_cannot_match_space(self):
         """ 
         No document immediate under the space, can share the space name 
         """
         with self.assertRaises(ValidationError):
-            doc = Document.objects.create(title='Wrong', path=self.space.path, space=self.space)
+            doc = Document.objects.create(
+                title='Wrong', 
+                path=self.space.path, 
+                space=self.space)
 
     def test_delete_document_in_path(self):
         """
@@ -114,6 +139,40 @@ class DocumentTestCase(TestCase):
         with self.assertRaises(ObjectDoesNotExist):
             Document.objects.get_by_path('mine/foo/bar/baz')
 
+    def test_special_characters_in_path(self):
+        """
+        Path elements should have special characters parsed out
+        """
+        path = "it's alive. bang!!bang! hash#hash"
+        expected = "its-alive-bangbang-hashhash"
+        doc = Document.objects.create(
+            title='Test Path', 
+            path=path, 
+            space=self.space)
+
+        self.assertEqual(doc.path, expected)
+
+
+class UserSpaceTestCase(TestCase):
+    """
+    A User Space, is a special space reserved for a user
+    """
+
+    def setUp(self):
+        self.space = Space.objects.get(name=USER_SPACE_NAME)
+
+    def test_space_path(self):
+        """
+        Ensure that documents cannot be put in the root path.
+        That part of the path is reserved for the username:
+        /user/<username>/
+        """
+        with self.assertRaises(ValidationError):
+            doc = Document.objects.create(
+                title='Bad', 
+                path='user/not_a_user', 
+                space=self.space)
+
 
 class RevisionTestCase(TestCase):
     """ 
@@ -128,7 +187,8 @@ class RevisionTestCase(TestCase):
             password='noneofyourbusiness')
 
         # Document with 2 revisions
-        self.doc = Document.objects.create(title='Foo', path='foo', space=space)
+        self.doc = Document.objects.create(
+            title='Foo', path='foo', space=space)
         rev = Revision.objects.create(
             content='Lorem ipsum dolor sit amet', 
             author=user, 

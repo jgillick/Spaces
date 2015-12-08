@@ -1,14 +1,17 @@
 from os import path
 
 from django.conf import settings
+from django.contrib.auth import get_user_model 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import models
 
 from .managers import DocumentManager
 from .utils import normalize_path
 
+ROOT_SPACE_NAME = '__ROOT__'
+USER_SPACE_NAME = '__USER__'
 
 class Space(models.Model):
     """ A general Space """
@@ -28,6 +31,18 @@ class Space(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_user_space_root(user):
+        """ 
+        Return the root document to a space for a specific user
+        """
+        user_space = Space.objects.get(name=USER_SPACE_NAME)
+        doc, created = Document.objects.get_or_create(
+            path=user.username, 
+            space=user_space,
+            parent=None)
+
+        return doc
+
 
 class Document(models.Model):
     """ A single document.
@@ -37,8 +52,8 @@ class Document(models.Model):
 
     path = models.CharField('URL Slug', max_length=100)
     title = models.CharField(max_length=100)
-    parent = models.ForeignKey('Document', null=True, blank=True)
     space = models.ForeignKey('Space')
+    parent = models.ForeignKey('Document', null=True, blank=True)
 
     def __unicode__(self):
         return self.title
@@ -56,7 +71,7 @@ class Document(models.Model):
         except ObjectDoesNotExist:
             return False
 
-    def full_uri(self):
+    def full_path(self):
         """ 
         Return the full URI path to this document from the space forward 
         """
@@ -95,6 +110,10 @@ class Document(models.Model):
                 space=self.space, 
                 create=True)
 
+        # Normalize path
+        else:
+            self.path = normalize_path(self.path)
+
         # If we're a root level document, we can't have the 
         # same path as the space. This is to cut down on confusion
         if (self.parent is None 
@@ -102,6 +121,15 @@ class Document(models.Model):
             raise ValidationError(
                 "This document cannot have the same path name as it's space (%s)" 
                 % self.space.path )
+
+        # User Space: Cannot create a root document that is not a username
+        if self.space.name == USER_SPACE_NAME and self.parent is None:
+            try:
+                get_user_model().objects.get(username=self.path)
+            except ObjectDoesNotExist:
+                raise ObjectDoesNotExist(
+                    "Invalid username '%s'" % self.path)
+
 
         super(Document, self).clean(*args, **kwargs)
 
