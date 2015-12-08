@@ -95,11 +95,34 @@ class Document(models.Model):
                 space=self.space, 
                 create=True)
 
+        # If we're a root level document, we can't have the 
+        # same path as the space. This is to cut down on confusion
+        if (self.parent is None 
+            and self.path.lower() == self.space.path.lower()):
+            raise ValidationError(
+                "This document cannot have the same path name as it's space (%s)" 
+                % self.space.path )
+
         super(Document, self).clean(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         self.full_clean()
         super(Document, self).save(*args, **kwargs)
+
+    def delete(self, with_children=False, *args, **kwargs):
+        """
+        If passed with with_children=True, all child documents will also be deleted
+        """
+
+        # Update child documents
+        for d in self.document_set.all():
+            if with_children:
+                d.delete(with_children=True)
+            else:
+                d.parent = self.parent
+                d.save()
+
+        super(Document, self).delete(*args, **kwargs)
 
 
 class Revision(models.Model):

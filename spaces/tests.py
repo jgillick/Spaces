@@ -103,14 +103,15 @@ class DocumentTestCase(TestCase):
         to the parent above
         """
         self.doc_bar.delete()
-        self.assertEqual(self.doc_baz.parent.path, self.doc_foo.path)
+        baz = Document.objects.get(path="baz")
+        self.assertEqual(baz.parent.path, self.doc_foo.path)
 
     def test_delete_all_in_path(self):
         """
-        Delete a document and all it's children with the `and_children` flag
+        Delete a document and all it's children with the `with_children` flag
         """
-        self.doc_bar.delete(and_children=True)
-        while self.assertRaises(ObjectDoesNotExist):
+        self.doc_bar.delete(with_children=True)
+        with self.assertRaises(ObjectDoesNotExist):
             Document.objects.get_by_path('mine/foo/bar/baz')
 
 
