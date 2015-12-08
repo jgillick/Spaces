@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 
 from .managers import DocumentManager
-from .document import normalize_path
+from .utils import normalize_path
 
 
 class Space(models.Model):
