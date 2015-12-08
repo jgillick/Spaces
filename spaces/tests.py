@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.test import TestCase
 
 from spaces.models import Space, Document, Revision
@@ -45,13 +45,13 @@ class DocumentTestCase(TestCase):
             Document.objects.create(title='Orphan', path='annie')
 
     def test_path_query_finder(self):
-        """ Find by full URI path """
+        """ Find document by full path """
         doc = Document.objects.get_by_path('mine/foo/bar/baz')
         self.assertEqual(doc, self.doc_baz)
 
     def test_path_with_extra_slashes(self):
         """ 
-        Tests that paths are normalized of extra slashed before searching 
+        Extra slashes in a path should be ignored when searching
         """
         doc = Document.objects.get_by_path('mine/foo/bar///baz/')
         self.assertEqual(doc, self.doc_baz)
@@ -63,8 +63,16 @@ class DocumentTestCase(TestCase):
         doc = Document.objects.get_by_path('/hello')
         self.assertEqual(doc, self.doc_root)
 
+    def test_space_in_inferred_from_parent(self):
+        """ 
+        If creating a document without a space, it's assumed from the parent
+        """
+        self.assertEqual(self.doc_bar.space.path, self.space.path)
+
     def test_cannot_have_parent_in_another_space(self):
-        """ A document cannot have a parent that belongs to another space """
+        """ 
+        A document cannot have a parent that belongs to another space 
+        """
         with self.assertRaises(ValidationError):
             Document.objects.create(
                 title='Wrong  parent', 
@@ -72,17 +80,38 @@ class DocumentTestCase(TestCase):
                 parent=self.doc_root, 
                 space=self.space)
 
-    def test_space_in_inferred_from_parent(self):
-        """ If creating a document without a space, it's assumed from the parent """
-        self.assertEqual(self.doc_bar.space.path, self.space.path)
-
     def test_create_with_full_uri(self):
-        """ Create a document with full URI path """
+        """ 
+        Create a document with full URI path 
+        """
         uri = 'foo/bar/baz/boo/foo'
         doc = Document.objects.create(title='Foo', path=uri, space=self.space)
 
         self.assertEqual(doc.path, 'foo')
         self.assertEqual(doc.full_uri(), "%s/%s" % (self.space.path, uri))
+
+    def test_first_doc_cannot_match_space(self):
+        """ 
+        No document immediate under the space, can share the space name 
+        """
+        with self.assertRaises(ValidationError):
+            doc = Document.objects.create(title='Wrong', path=self.space.path, space=self.space)
+
+    def test_delete_document_in_path(self):
+        """
+        When deleting a document in the middle of the path, all children should be assigned 
+        to the parent above
+        """
+        self.doc_bar.delete()
+        self.assertEqual(self.doc_baz.parent.path, self.doc_foo.path)
+
+    def test_delete_all_in_path(self):
+        """
+        Delete a document and all it's children with the `and_children` flag
+        """
+        self.doc_bar.delete(and_children=True)
+        while self.assertRaises(ObjectDoesNotExist):
+            Document.objects.get_by_path('mine/foo/bar/baz')
 
 
 class RevisionTestCase(TestCase):
@@ -115,3 +144,9 @@ class RevisionTestCase(TestCase):
         """ A document should always reference the latest revision """
         self.assertEqual(self.doc.latest().content, 'Sed dignissim lacinia nunc.')
 
+    def test_delete_revisions(self):
+        """
+        Deleting a document should remove all revisions
+        """
+        self.doc.delete()
+        self.assertEqual(Revision.objects.count(), 0)

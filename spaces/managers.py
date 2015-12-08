@@ -46,8 +46,7 @@ class DocumentManager(models.Manager):
                 doc = queryset.get(
                     path=p, 
                     parent=doc, 
-                    space_id=space.id, 
-                    space_type=ContentType.objects.get_for_model(space))
+                    space=space)
             except ObjectDoesNotExist:
                 if create:
                     doc = self.create(title=p, path=p, parent=doc, space=space)

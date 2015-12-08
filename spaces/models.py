@@ -3,7 +3,7 @@ from os import path
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 
 from .managers import DocumentManager
@@ -29,13 +29,6 @@ class Space(models.Model):
         return self.name
 
 
-class UserSpace(models.Model):
-    """ Every user has their own space that only they
-        can create/edit content in """
-
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-
-
 class Document(models.Model):
     """ A single document.
         The actual content existing in the revisions. """
@@ -45,15 +38,7 @@ class Document(models.Model):
     path = models.CharField('URL Slug', max_length=100)
     title = models.CharField(max_length=100)
     parent = models.ForeignKey('Document', null=True, blank=True)
-
-    # Belongs to either a Space or a UserSpace
-    space_models = models.Q(app_label="spaces", model='Space') \
-        | models.Q(app_label="spaces", model='UserSpace')
-    space_type = models.ForeignKey(ContentType,
-        on_delete=models.CASCADE,
-        limit_choices_to=space_models)
-    space_id = models.PositiveIntegerField()
-    space = GenericForeignKey('space_type', 'space_id')
+    space = models.ForeignKey('Space')
 
     def __unicode__(self):
         return self.title
@@ -61,6 +46,15 @@ class Document(models.Model):
     def latest(self):
         """ Get the latest revision """
         return self.revision_set.order_by('-id').first()
+
+    def has_space(self):
+        """ 
+        Return the space attached to this document, otherwise, return False
+        """
+        try:
+            return self.space
+        except ObjectDoesNotExist:
+            return False
 
     def full_uri(self):
         """ 
@@ -80,11 +74,11 @@ class Document(models.Model):
         """ Custom clean method """
 
         # Parent document needs to be in same space
-        if (self.parent and self.space and self.parent.space != self.space):
+        if (self.parent and self.has_space() and self.parent.space != self.space):
             raise ValidationError("Parent not in the same space")
 
         # If no space, default to root or take parent's
-        elif self.space is None:
+        elif not self.has_space():
             if self.parent is not None:
                 self.space = self.parent.space
             else:
@@ -94,7 +88,7 @@ class Document(models.Model):
         if self.path.find('/') > -1:
             path = normalize_path(self.path).split("/")
             parentPath = path[0:-1];
-            
+
             self.path = path[-1]
             self.parent = Document.objects.get_by_path(
                 parentPath, 
