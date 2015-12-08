@@ -1,21 +1,20 @@
 #!/usr/bin/env bash
 
 # Prerequisites
-sudo apt-get update
-sudo apt-get install -y python-pip python-dev vim
+apt-get update
+apt-get install -y python-pip python-dev vim
 
 # Mysql
-sudo debconf-set-selections <<< "mysql-server mysql-server/root_password password \"''\""
-sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password \"''\""
-sudo apt-get install -y mysql-server libmysqlclient-dev
+debconf-set-selections <<< "mysql-server mysql-server/root_password password \"''\""
+debconf-set-selections <<< "mysql-server mysql-server/root_password_again password \"''\""
+apt-get install -y mysql-server libmysqlclient-dev
 
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS spaces;"
 mysql -u root -e "GRANT ALL PRIVILEGES ON spaces.* TO 'spaceman'@'localhost'; FLUSH PRIVILEGES;"
 mysql -u root -e "GRANT ALL PRIVILEGES ON test_spaces.* TO 'spaceman'@'localhost'; FLUSH PRIVILEGES;"
 
 # Python libs
-sudo pip install django
-sudo pip install mysql-python
+pip install django mysql-python uwsgi bpython 
 
 # Run migrations
 cd /vagrant/
