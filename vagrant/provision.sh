@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+ADMIN_USER='admin'
+ADMIN_EMAIL='admin@localhost'
+ADMIN_PASS='password'
+
 # Prerequisites
 apt-get update
 apt-get install -y python-pip python-dev vim
@@ -20,8 +24,12 @@ pip install django mysql-python bpython
 cd /vagrant/
 python manage.py migrate
 
+# Add super user
+echo "Create super user..."
+echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@localhost', 'password')" | python manage.py shell
+
 #
-# Shell goodies
+# Setup bash
 #
 BASH_PROFILE=/home/vagrant/.profile
 
