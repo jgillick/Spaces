@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, Validat
 from django.db import models
 
 from .managers import DocumentManager
-from .utils import normalize_path
+from .utils import normalize_path, to_slug
 
 ROOT_SPACE_NAME = '__ROOT__'
 USER_SPACE_NAME = '__USER__'
@@ -42,6 +42,14 @@ class Space(models.Model):
             parent=None)
 
         return doc
+
+    def full_clean(self, *args, **kwargs):
+        self.path = to_slug(self.path)
+        super(Space, self).clean(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Space, self).save(*args, **kwargs)
 
 
 class Document(models.Model):
@@ -112,7 +120,7 @@ class Document(models.Model):
 
         # Normalize path
         else:
-            self.path = normalize_path(self.path)
+            self.path = to_slug(self.path)
 
         # If we're a root level document, we can't have the 
         # same path as the space. This is to cut down on confusion
@@ -129,7 +137,6 @@ class Document(models.Model):
             except ObjectDoesNotExist:
                 raise ObjectDoesNotExist(
                     "Invalid username '%s'" % self.path)
-
 
         super(Document, self).clean(*args, **kwargs)
 

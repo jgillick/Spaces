@@ -17,6 +17,11 @@ class SpaceTestCase(TestCase):
         """ The default application should have a __USER__ space """
         Space.objects.get(name=USER_SPACE_NAME)
 
+    def test_convert_path_to_slug(self):
+        """ Convert special characters in path """
+        space = Space.objects.create(name='Test Space', path=' this-is / a !$ test  ')
+        self.assertEqual(space.path, 'this-is-a-test')
+
 
 
 class DocumentTestCase(TestCase):
@@ -151,6 +156,11 @@ class DocumentTestCase(TestCase):
             space=self.space)
 
         self.assertEqual(doc.path, expected)
+
+    def test_convert_path_to_slug(self):
+        """ Convert special characters in path """
+        space = Space.objects.create(name='Test Space', path=' this-is / a !$ test  ')
+        self.assertEqual(space.path, 'this-is-a-test')
 
 
 class UserSpaceTestCase(TestCase):
