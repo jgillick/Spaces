@@ -14,7 +14,7 @@ mysql -u root -e "GRANT ALL PRIVILEGES ON spaces.* TO 'spaceman'@'localhost'; FL
 mysql -u root -e "GRANT ALL PRIVILEGES ON test_spaces.* TO 'spaceman'@'localhost'; FLUSH PRIVILEGES;"
 
 # Python libs
-pip install django mysql-python uwsgi bpython 
+pip install django mysql-python bpython 
 
 # Run migrations
 cd /vagrant/
