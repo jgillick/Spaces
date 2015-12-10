@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.test import TestCase
 
 from spaces.models import Space, Document, Revision, \
-                          ROOT_SPACE_NAME, USER_SPACE_NAME
+                          ROOT_SPACE_NAME, USER_SPACE_NAME, ROOT_DOC_NAME
 
 
 class SpaceTestCase(TestCase):
@@ -19,7 +19,8 @@ class SpaceTestCase(TestCase):
 
     def test_convert_path_to_slug(self):
         """ Convert special characters in path """
-        space = Space.objects.create(name='Test Space', path=' this-is / a !$ test  ')
+        space = Space.objects.create(
+            name='Test Space', path=' this-is / a !$ test  ')
         self.assertEqual(space.path, 'this-is-a-test')
 
 
@@ -69,6 +70,15 @@ class DocumentTestCase(TestCase):
         with self.assertRaises(ValidationError):
             Document.objects.create(
                 title='Orphan', path='annie')
+
+    def test_root_space_doc_path(self):
+        """
+        Get the space root document by path
+        """
+        doc = Document.objects.get_by_path('mine')
+        self.assertEqual(doc.space.path, self.space.path)
+        self.assertEqual(doc.path, ROOT_DOC_NAME)
+        self.assertEqual(doc.parent, None)
 
     def test_path_query_finder(self):
         """ Find document by full path """

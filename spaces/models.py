@@ -12,6 +12,7 @@ from .utils import normalize_path, to_slug
 
 ROOT_SPACE_NAME = '__ROOT__'
 USER_SPACE_NAME = '__USER__'
+ROOT_DOC_NAME = '__ROOT__'
 
 class Space(models.Model):
     """ A general Space """
@@ -40,15 +41,18 @@ class Space(models.Model):
 
         return doc
 
-    def get_root_document():
+    def get_root_document(self):
         """
         Return the root document for the space
         """
-        return Document.objects.get_or_create(
-            path=ROOT_SPACE_NAME, 
-            title=ROOT_SPACE_NAME,
+        doc, created = Document.objects.get_or_create(
+            path=ROOT_DOC_NAME, 
+            title=ROOT_DOC_NAME,
             space=self,
+            space_doc=True,
             parent=None)
+
+        return doc
 
 
     def full_clean(self, *args, **kwargs):
@@ -66,8 +70,11 @@ class Document(models.Model):
 
     objects = DocumentManager()
 
-    path = models.CharField('URL Slug', max_length=100)
+    path = models.CharField('URL Slug', max_length=100, blank=True)
     title = models.CharField(max_length=100)
+    space_doc = models.BooleanField(
+        'Is this the space root document', 
+        default=False)
     space = models.ForeignKey('Space')
     parent = models.ForeignKey('Document', null=True, blank=True)
 
@@ -106,7 +113,7 @@ class Document(models.Model):
 
         return uri
 
-    def full_clean(self, *args, **kwargs):
+    def full_clean(self, override_path_normalization=False, *args, **kwargs):
         """ Custom clean method """
 
         # Parent document needs to be in same space
@@ -132,7 +139,7 @@ class Document(models.Model):
                 create=True)
 
         # Normalize path
-        else:
+        elif not self.space_doc:
             self.path = to_slug(self.path)
 
         # If we're a root level document, we can't have the 
@@ -153,8 +160,8 @@ class Document(models.Model):
 
         super(Document, self).full_clean(*args, **kwargs)
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
+    def save(self, override_path_normalization=False, *args, **kwargs):
+        self.full_clean(override_path_normalization)
         super(Document, self).save(*args, **kwargs)
 
     def delete(self, with_children=False, *args, **kwargs):

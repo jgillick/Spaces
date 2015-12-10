@@ -40,18 +40,21 @@ class DocumentManager(models.Manager):
         # Follow the path
         doc = None
         curPath = space.path
-        for p in path:
-            curPath += "/%s" % p
-            try:
-                doc = queryset.get(
-                    path=p, 
-                    parent=doc, 
-                    space=space)
-            except ObjectDoesNotExist:
-                if create:
-                    doc = self.create(title=p, path=p, parent=doc, space=space)
-                else:
-                    raise ObjectDoesNotExist("Document at %s does not exist" % curPath)
+        if len(path):
+            for p in path:
+                curPath += "/%s" % p
+                try:
+                    doc = queryset.get(
+                        path=p, 
+                        parent=doc, 
+                        space=space)
+                except ObjectDoesNotExist:
+                    if create:
+                        doc = self.create(title=p, path=p, parent=doc, space=space)
+                    else:
+                        raise ObjectDoesNotExist("Document at %s does not exist" % curPath)
+        else:
+            doc = space.get_root_document()
 
         return doc
             
