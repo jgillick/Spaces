@@ -2,13 +2,22 @@ from django.views import generic
 
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Space, Document
 
 
 class DocView(generic.DetailView):
     model = Document
-    template_name = 'spaces/index.html'
+    template_name = 'spaces/document.html'
+
+    def get_object(self):
+        try:
+            document = Document.objects.get_by_path(self.kwargs["slug"])
+        except ObjectDoesNotExist:
+            document = None
+        return document
+
 
 class UserDocView(generic.DetailView):
     model = Document

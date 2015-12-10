@@ -3,5 +3,14 @@
 {% block title %}My Document{% endblock %}
 
 {% block content %}
-  Document content
+
+  {% if document %}
+    {% if document.latest %}
+      {{document.latest.content}}
+    {% else %}
+      Add content!
+    {% endif %}
+  {% else %}
+    No document here
+  {% endif %}
 {% endblock %}
