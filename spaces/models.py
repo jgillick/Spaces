@@ -20,13 +20,10 @@ class Space(models.Model):
     path = models.CharField(max_length=40)
     created_on = models.DateTimeField(auto_now_add=True)
 
-    # class Meta:
-    #     permissions = (
-    #         ("view_documents", "Can view documents in this space"),
-    #         ("add_document", "Can add documents in this space"),
-    #         ("edit_document", "Can edit documents in this space"),
-    #         ("delete_document", "Can remove documents in this space"),
-    #     )
+    class Meta:
+        permissions = (
+            ("view_space", "Can view a space"),
+        )
 
     def __unicode__(self):
         return self.name
@@ -73,6 +70,11 @@ class Document(models.Model):
     title = models.CharField(max_length=100)
     space = models.ForeignKey('Space')
     parent = models.ForeignKey('Document', null=True, blank=True)
+
+    class Meta:
+        permissions = (
+            ("view_document", "Can view a document"),
+        )
 
     def __unicode__(self):
         return self.title
