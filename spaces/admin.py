@@ -14,28 +14,15 @@ class RevisionInline(admin.StackedInline):
     def get_queryset(self, request):
         """ Only return the latest revision """
         qs = super(RevisionInline, self).get_queryset(request)
-        return qs.order_by('-created_on').filter(id=qs[0].id)
+        if qs.count() > 0:
+            return qs.order_by('-created_on').filter(id=qs[0].id)
+        return qs
 
 
 class DocumentAdmin(admin.ModelAdmin):
-    fields = ['title', 'path']
+    fields = ['title', 'path', 'space']
+    list_display = ['title', 'full_path']
     inlines = [RevisionInline]
-
-    def save_model(self, request, obj, form, change):
-        """ Add __ROOT__ as the default space """
-        space = Space.objects.filter(id=1)[0]
-        obj.space = space
-        obj.save()
-
-    def save_formset(self, request, form, formset, change):
-        """ Create a new revision on save """
-
-        revisions = formset.save(commit=False)
-        rev = revisions[0]
-        newRev = Revision(doc=rev.doc, author=rev.author, content=rev.content)
-        newRev.save()
-
-        formset.save_m2m()
 
 class RevisionAdmin(admin.ModelAdmin):
     list_display = ('id', 'doc', 'author', 'created_on')

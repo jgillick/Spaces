@@ -43,6 +43,17 @@ class Space(models.Model):
 
         return doc
 
+    def get_root_document():
+        """
+        Return the root document for the space
+        """
+        return Document.objects.get_or_create(
+            path=ROOT_SPACE_NAME, 
+            title=ROOT_SPACE_NAME,
+            space=self,
+            parent=None)
+
+
     def full_clean(self, *args, **kwargs):
         self.path = to_slug(self.path)
         super(Space, self).clean(*args, **kwargs)
@@ -138,7 +149,7 @@ class Document(models.Model):
                 raise ObjectDoesNotExist(
                     "Invalid username '%s'" % self.path)
 
-        super(Document, self).clean(*args, **kwargs)
+        super(Document, self).full_clean(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         self.full_clean()
