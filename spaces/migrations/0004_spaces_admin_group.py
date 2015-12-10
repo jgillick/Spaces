@@ -30,14 +30,17 @@ def create_admin_group(apps, schema_editor):
     # Apply permissions
     for group, perm_list in group_permissions.iteritems():
         for p in perm_list:
-            perm = Permission.objects.get(codename=p)
+            try:
+                perm = Permission.objects.get(codename=p)
 
-            admin.permissions.add(perm)
-            if group == "editor":
-                editor.permissions.add(perm)
-            elif group == "viewer":
-                editor.permissions.add(perm)
-                viewer.permissions.add(perm)
+                admin.permissions.add(perm)
+                if group == "editor":
+                    editor.permissions.add(perm)
+                elif group == "viewer":
+                    editor.permissions.add(perm)
+                    viewer.permissions.add(perm)
+            except:
+                pass
 
 
 def rollback_admin_group(apps, schema_editor):
