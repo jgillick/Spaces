@@ -1,10 +1,13 @@
 from os import path
 
 from django.conf import settings
-from django.contrib.auth import get_user_model 
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, \
+    PermissionDenied, \
+    ValidationError
+from django.core.urlresolvers import reverse
 from django.db import models
 
 from .managers import DocumentManager
@@ -14,8 +17,12 @@ ROOT_SPACE_NAME = '__ROOT__'
 USER_SPACE_NAME = '__USER__'
 ROOT_DOC_NAME = '__ROOT__'
 
+
 class Space(models.Model):
-    """ A general Space """
+
+    """
+    A general Space.
+    """
 
     name = models.CharField(max_length=100)
     path = models.CharField(max_length=40)
@@ -30,12 +37,12 @@ class Space(models.Model):
         return self.name
 
     def get_user_space_root(user):
-        """ 
-        Return the root document to a space for a specific user
+        """
+        Return the root document to a space for a specific user.
         """
         user_space = Space.objects.get(name=USER_SPACE_NAME)
         doc, created = Document.objects.get_or_create(
-            path=user.username, 
+            path=user.username,
             space=user_space,
             parent=None)
 
@@ -43,17 +50,16 @@ class Space(models.Model):
 
     def get_root_document(self):
         """
-        Return the root document for the space
+        Return the root document for the space.
         """
         doc, created = Document.objects.get_or_create(
-            path=ROOT_DOC_NAME, 
+            path=ROOT_DOC_NAME,
             title=ROOT_DOC_NAME,
             space=self,
             space_doc=True,
             parent=None)
 
         return doc
-
 
     def full_clean(self, *args, **kwargs):
         self.path = to_slug(self.path)
@@ -65,15 +71,19 @@ class Space(models.Model):
 
 
 class Document(models.Model):
-    """ A single document.
-        The actual content existing in the revisions. """
+
+    """
+    A single document.
+
+    The actual content existing in the revisions.
+    """
 
     objects = DocumentManager()
 
     path = models.CharField('URL Slug', max_length=100, blank=True)
     title = models.CharField(max_length=100)
     space_doc = models.BooleanField(
-        'Is this the space root document', 
+        'Is this the space root document',
         default=False)
     space = models.ForeignKey('Space')
     parent = models.ForeignKey('Document', null=True, blank=True)
@@ -91,7 +101,7 @@ class Document(models.Model):
         return self.revision_set.order_by('-id').first()
 
     def has_space(self):
-        """ 
+        """
         Return the space attached to this document, otherwise, return False
         """
         try:
@@ -100,10 +110,7 @@ class Document(models.Model):
             return False
 
     def full_path(self):
-        """ 
-        Return the full URI path to this document from the space forward 
-        """
-
+        """ The full path to this document, from the space forward. """
         uri = self.path
         parent = self.parent
         while parent is not None:
@@ -112,6 +119,10 @@ class Document(models.Model):
         uri = path.join(self.space.path, uri)
 
         return uri
+
+    def get_absolute_url(self):
+        """ Get the absolute URL route to the document. """
+        return reverse('spaces:document', kwargs={'path': self.full_path()})
 
     def full_clean(self, override_path_normalization=False, *args, **kwargs):
         """ Custom clean method """
@@ -134,20 +145,20 @@ class Document(models.Model):
 
             self.path = path[-1]
             self.parent = Document.objects.get_by_path(
-                parentPath, 
-                space=self.space, 
+                parentPath,
+                space=self.space,
                 create=True)
 
         # Normalize path
         elif not self.space_doc:
             self.path = to_slug(self.path)
 
-        # If we're a root level document, we can't have the 
+        # If we're a root level document, we can't have the
         # same path as the space. This is to cut down on confusion
-        if (self.parent is None 
+        if (self.parent is None
             and self.path.lower() == self.space.path.lower()):
             raise ValidationError(
-                "This document cannot have the same path name as it's space (%s)" 
+                "This document cannot have the same path name as it's space (%s)"
                 % self.space.path )
 
         # User Space: Cannot create a root document that is not a username
@@ -181,8 +192,12 @@ class Document(models.Model):
 
 
 class Revision(models.Model):
-    """ A revision for a document.
-        Every time a document is edited, a new revision is created """
+
+    """
+    A revision for a document.
+
+    Every time a document is edited, a new revision is created.
+    """
 
     doc = models.ForeignKey('Document', verbose_name="Document")
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
@@ -195,9 +210,15 @@ class Revision(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
 
-        # Every time we save a revision, it should create a new revision
-        self.id = None
-        self.created_on = None
+        # If it's the same content as the current revision, don't save
+        latestContent = self.doc.latest()
+        if latestContent and latestContent.content == self.content:
+            return
+
+        # Otherwise, always create new revision
+        else:
+            self.id = None
+            self.created_on = None
 
         super(Revision, self).save(*args, **kwargs)
 

@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model 
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.test import TestCase
 
@@ -8,6 +8,9 @@ from spaces.models import Space, Document, Revision, \
 
 class SpaceTestCase(TestCase):
     """ Test Space Models """
+
+    def setUp(self):
+        self.space = Space.objects.create(name='My Space!', path='mine')
 
     def test_root_space_should_be_present(self):
         """ The default application should have a __ROOT__ space """
@@ -23,46 +26,50 @@ class SpaceTestCase(TestCase):
             name='Test Space', path=' this-is / a !$ test  ')
         self.assertEqual(space.path, 'this-is-a-test')
 
+    def test_cannot_create_existing_space(self):
+        """ Cannot create a space with the same path or name """
+        with self.assertRaises(Exception):
+            Space.objects.create(name='My Space!', path='mine')
 
 
 class DocumentTestCase(TestCase):
-    """ 
-    Test the Document Model 
+    """
+    Test the Document Model
     """
 
     def setUp(self):
         self.space = Space.objects.create(name='My Space!', path='mine')
 
         self.user = get_user_model().objects.create_user(
-            username='bob', 
-            email='bob@dobbs.com', 
+            username='bob',
+            email='bob@dobbs.com',
             password='noneofyourbusiness')
 
-        # Document hierarchy 
+        # Document hierarchy
         self.doc_foo = Document.objects.create(
-            title='Foo', 
-            path='foo', 
+            title='Foo',
+            path='foo',
             space=self.space)
         self.doc_bar = Document.objects.create(
-            title='Bar', 
-            path='bar', 
+            title='Bar',
+            path='bar',
             parent=self.doc_foo)
         self.doc_baz = Document.objects.create(
-            title='Baz', 
-            path='baz', 
+            title='Baz',
+            path='baz',
             parent=self.doc_bar)
 
         # Create hierarchy by full path
         self.doc_uri = Document.objects.create(
-            title='Quick Fox', 
-            path='quick/brown/fox', 
+            title='Quick Fox',
+            path='quick/brown/fox',
             space=self.space)
 
         # Root document
         root = Space.objects.get(name=ROOT_SPACE_NAME)
         self.doc_root = Document.objects.create(
-            title='Root doc', 
-            path='hello', 
+            title='Root doc',
+            path='hello',
             space=root)
 
     def test_create_document_without_a_space(self):
@@ -70,6 +77,23 @@ class DocumentTestCase(TestCase):
         with self.assertRaises(ValidationError):
             Document.objects.create(
                 title='Orphan', path='annie')
+
+    def test_cannot_create_existing_document(self):
+        """
+        Cannot create a document with the same path under the same parent
+        """
+        with self.assertRaises(Exception):
+            Document.objects.create(
+                title='Bar',
+                path='bar',
+                parent=self.doc_foo)
+
+    def test_can_create_same_under_other_parent(self):
+        """ Can create a document with the same path under another parent """
+        Document.objects.create(
+            title='Bar',
+            path='bar',
+            parent=self.doc_bar)
 
     def test_root_space_doc_path(self):
         """
@@ -86,7 +110,7 @@ class DocumentTestCase(TestCase):
         self.assertEqual(doc, self.doc_baz)
 
     def test_path_with_extra_slashes(self):
-        """ 
+        """
         Extra slashes in a path should be ignored when searching
         """
         doc = Document.objects.get_by_path('mine/foo/bar///baz/')
@@ -100,25 +124,25 @@ class DocumentTestCase(TestCase):
         self.assertEqual(doc, self.doc_root)
 
     def test_space_in_inferred_from_parent(self):
-        """ 
+        """
         If creating a document without a space, it's assumed from the parent
         """
         self.assertEqual(self.doc_bar.space.path, self.space.path)
 
     def test_cannot_have_parent_in_another_space(self):
-        """ 
-        A document cannot have a parent that belongs to another space 
+        """
+        A document cannot have a parent that belongs to another space
         """
         with self.assertRaises(ValidationError):
             Document.objects.create(
-                title='Wrong  parent', 
-                path='wrong', 
-                parent=self.doc_root, 
+                title='Wrong  parent',
+                path='wrong',
+                parent=self.doc_root,
                 space=self.space)
 
     def test_create_with_full_path(self):
-        """ 
-        Create a document with full path 
+        """
+        Create a document with full path
         """
         uri = 'foo/bar/baz/boo/foo'
         doc = Document.objects.create(
@@ -128,18 +152,18 @@ class DocumentTestCase(TestCase):
         self.assertEqual(doc.full_path(), "%s/%s" % (self.space.path, uri))
 
     def test_first_doc_cannot_match_space(self):
-        """ 
-        No document immediate under the space, can share the space name 
+        """
+        No document immediate under the space, can share the space name
         """
         with self.assertRaises(ValidationError):
             doc = Document.objects.create(
-                title='Wrong', 
-                path=self.space.path, 
+                title='Wrong',
+                path=self.space.path,
                 space=self.space)
 
     def test_delete_document_in_path(self):
         """
-        When deleting a document in the middle of the path, all children should be assigned 
+        When deleting a document in the middle of the path, all children should be assigned
         to the parent above
         """
         self.doc_bar.delete()
@@ -161,8 +185,8 @@ class DocumentTestCase(TestCase):
         path = "it's alive. bang!!bang! hash#hash"
         expected = "its-alive-bangbang-hashhash"
         doc = Document.objects.create(
-            title='Test Path', 
-            path=path, 
+            title='Test Path',
+            path=path,
             space=self.space)
 
         self.assertEqual(doc.path, expected)
@@ -189,29 +213,29 @@ class UserSpaceTestCase(TestCase):
         """
         with self.assertRaises(ValidationError):
             doc = Document.objects.create(
-                title='Bad', 
-                path='user/not_a_user', 
+                title='Bad',
+                path='user/not_a_user',
                 space=self.space)
 
 
 class RevisionTestCase(TestCase):
-    """ 
-    Test Document Revision Models 
+    """
+    Test Document Revision Models
     """
 
     def setUp(self):
         space = Space.objects.get(path='')
         user = get_user_model().objects.create_user(
-            username='bob', 
-            email='bob@dobbs.com', 
+            username='bob',
+            email='bob@dobbs.com',
             password='noneofyourbusiness')
 
         # Document with 2 revisions
         self.doc = Document.objects.create(
             title='Foo', path='foo', space=space)
         rev = Revision.objects.create(
-            content='Lorem ipsum dolor sit amet', 
-            author=user, 
+            content='Lorem ipsum dolor sit amet',
+            author=user,
             doc=self.doc)
 
         rev.content = 'Sed dignissim lacinia nunc.'
@@ -224,6 +248,15 @@ class RevisionTestCase(TestCase):
     def test_correct_revision(self):
         """ A document should always reference the latest revision """
         self.assertEqual(self.doc.latest().content, 'Sed dignissim lacinia nunc.')
+
+    def test_save_no_change_same_rev(self):
+        """
+        If saving a revision that is the same as the last,
+        it does not create a new one
+        """
+        initialRevCount = self.doc.revision_set.count()
+        self.doc.latest().save()
+        self.assertEqual(self.doc.revision_set.count(), initialRevCount)
 
     def test_delete_revisions(self):
         """
