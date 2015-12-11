@@ -1,0 +1,15 @@
+{% extends "spaces/layout.html" %}
+
+{% block title %}Edit Document{% endblock %}
+
+{% block content %}
+  Edit this document
+  <form action="{% url 'spaces:document_edit' path=object.path %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {{ revision_form.as_p }}
+    <p>
+      <button type="submit">Save</button>
+    </p>
+  </form>
+{% endblock %}
