@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import Document, Revision, Space
 
+
 class SpaceAdmin(admin.ModelAdmin):
     list_display = ('name', 'path')
 
@@ -23,6 +24,7 @@ class DocumentAdmin(admin.ModelAdmin):
     fields = ['title', 'path', 'space']
     list_display = ['title', 'full_path']
     inlines = [RevisionInline]
+
 
 class RevisionAdmin(admin.ModelAdmin):
     list_display = ('id', 'doc', 'author', 'created_on')

@@ -8,22 +8,22 @@ from django.db import models
 from .utils import normalize_path
 
 class DocumentManager(models.Manager):
-    """ Custom document queryset object """ 
+    """ Custom document queryset object """
 
     def get_by_path(self, path, space=None, create=False):
-        """ 
+        """
         Get a document from a full URI path, including space.
-        
+
         Args:
             path: Full path to the document:
                   <space>/<path>/<path>/<path>
-            space: The space the path is under. If not set, the 
+            space: The space the path is under. If not set, the
                    first path segment is assumed to be the space
             create: Creates document for path segments
                     that do not exist
         """
 
-        from .models import Space
+        from .models import Space, ROOT_SPACE_NAME
 
         if type(path) is not list:
             path = normalize_path(path).split('/')
@@ -35,7 +35,7 @@ class DocumentManager(models.Manager):
                 space = Space.objects.get(path=path[0])
                 path.pop(0)
             except ObjectDoesNotExist:
-                raise ObjectDoesNotExist("The space '%s' does not exist" % path[0])
+                space = Space.objects.get(name=ROOT_SPACE_NAME)
 
         # Follow the path
         doc = None
@@ -45,8 +45,8 @@ class DocumentManager(models.Manager):
                 curPath += "/%s" % p
                 try:
                     doc = queryset.get(
-                        path=p, 
-                        parent=doc, 
+                        path=p,
+                        parent=doc,
                         space=space)
                 except ObjectDoesNotExist:
                     if create:
@@ -57,4 +57,3 @@ class DocumentManager(models.Manager):
             doc = space.get_root_document()
 
         return doc
-            
