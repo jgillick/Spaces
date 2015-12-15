@@ -14,7 +14,12 @@ class DocumentForm(forms.ModelForm):
 
 class RevisionFormset(BaseInlineFormSet):
 
+    """
+    For the revision formset included with the document.
+    """
+
     def __init__(self, *args, **kwargs):
+        """ Need to instantiated with an 'author' param. """
         self.author = kwargs.pop('author', None)
         super(RevisionFormset, self).__init__(*args, **kwargs)
 
@@ -23,17 +28,6 @@ class RevisionFormset(BaseInlineFormSet):
                 if form.instance.pk is None:
                     form.instance.author = self.author
 
-    def clean(self, *args, **kwargs):
-        super(RevisionFormset, self).clean(*args, **kwargs)
-
-        # Validate the the author is the logged in user
-        # for form in self.forms:
-        #     print form.cleaned_data
-        #     if form.cleaned_data.get('author') != self.author:
-        #         form.add_error(
-        #             'author',
-        #             'There was an error setting the author')
-
 
 RevisionInlineFormset = inlineformset_factory(
     Document,
@@ -41,5 +35,4 @@ RevisionInlineFormset = inlineformset_factory(
     formset=RevisionFormset,
     extra=1, max_num=1,
     fields=('content',),
-    # exclude=(),
     can_delete=False)
