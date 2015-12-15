@@ -24,8 +24,8 @@ class Space(models.Model):
     A general Space.
     """
 
-    name = models.CharField(max_length=100)
-    path = models.CharField(max_length=40)
+    name = models.CharField(max_length=100, unique=True)
+    path = models.CharField(max_length=40, unique=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -53,7 +53,7 @@ class Space(models.Model):
         Return the root document for the space.
         """
         doc, created = Document.objects.get_or_create(
-            path=ROOT_DOC_NAME,
+            path='',
             title=ROOT_DOC_NAME,
             space=self,
             space_doc=True,
@@ -63,7 +63,7 @@ class Space(models.Model):
 
     def full_clean(self, *args, **kwargs):
         self.path = to_slug(self.path)
-        super(Space, self).clean(*args, **kwargs)
+        super(Space, self).full_clean(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -83,12 +83,13 @@ class Document(models.Model):
     path = models.CharField('URL Slug', max_length=100, blank=True)
     title = models.CharField(max_length=100)
     space_doc = models.BooleanField(
-        'Is this the space root document',
+        "Is this a space's root document",
         default=False)
     space = models.ForeignKey('Space')
     parent = models.ForeignKey('Document', null=True, blank=True)
 
     class Meta:
+        unique_together = ("path", "parent"),
         permissions = (
             ("view_document", "Can view a document"),
         )
@@ -116,7 +117,9 @@ class Document(models.Model):
         while parent is not None:
             uri = path.join(parent.path, uri)
             parent = parent.parent
-        uri = path.join(self.space.path, uri)
+
+        if self.space.name != ROOT_SPACE_NAME:
+            uri = path.join(self.space.path, uri)
 
         return uri
 
@@ -131,7 +134,7 @@ class Document(models.Model):
         if (self.parent and self.has_space() and self.parent.space != self.space):
             raise ValidationError("Parent not in the same space")
 
-        # If no space, default to root or take parent's
+        # If no space, default to parent's
         elif not self.has_space():
             if self.parent is not None:
                 self.space = self.parent.space
@@ -153,10 +156,14 @@ class Document(models.Model):
         elif not self.space_doc:
             self.path = to_slug(self.path)
 
+        # Set no parent to root document
+        if self.parent is None and not self.space_doc:
+            self.parent = self.space.get_root_document()
+
         # If we're a root level document, we can't have the
         # same path as the space. This is to cut down on confusion
-        if (self.parent is None
-            and self.path.lower() == self.space.path.lower()):
+        if (not self.space_doc and self.parent.space_doc
+                and self.path.lower() == self.space.path.lower()):
             raise ValidationError(
                 "This document cannot have the same path name as it's space (%s)"
                 % self.space.path )
@@ -168,6 +175,11 @@ class Document(models.Model):
             except ObjectDoesNotExist:
                 raise ObjectDoesNotExist(
                     "Invalid username '%s'" % self.path)
+
+        #  No hierarchy is allowed under the __ROOT__ space
+        if self.space.name == ROOT_SPACE_NAME and not self.space_doc:
+            raise ValidationError(
+                "Cannot put child pages under the root space")
 
         super(Document, self).full_clean(*args, **kwargs)
 
@@ -200,7 +212,7 @@ class Revision(models.Model):
     """
 
     doc = models.ForeignKey('Document', verbose_name="Document")
-    author = models.ForeignKey(settings.AUTH_USER_MODEL)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL) #editable=False
     content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
 

@@ -7,6 +7,7 @@ from django.db import models
 
 from .utils import normalize_path
 
+
 class DocumentManager(models.Manager):
     """ Custom document queryset object """
 
@@ -25,21 +26,24 @@ class DocumentManager(models.Manager):
 
         from .models import Space, ROOT_SPACE_NAME
 
+        queryset = self.get_queryset()
+
         if type(path) is not list:
             path = normalize_path(path).split('/')
-        queryset = self.get_queryset()
 
         # Get space
         if space is None:
+            rootPath = path.pop(0)
             try:
-                space = Space.objects.get(path=path[0])
-                path.pop(0)
+                space = Space.objects.get(path=rootPath)
             except ObjectDoesNotExist:
-                space = Space.objects.get(name=ROOT_SPACE_NAME)
+                raise ObjectDoesNotExist(
+                    "Document at %s does not exist" % rootPath)
 
         # Follow the path
         doc = None
         curPath = space.path
+        doc = space.get_root_document()
         if len(path):
             for p in path:
                 curPath += "/%s" % p
