@@ -24,18 +24,20 @@ class DocView(generic.DetailView):
         return document
 
 
-class DocUpdate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
+class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
 
-    """ Edit a document. """
+    """ Create a new document """
 
     form_class = DocumentForm
     template_name = 'spaces/document/edit.html'
 
     def get_object(self):
+        doc = Document()
         try:
-            return Document.objects.get_by_path(self.kwargs["path"])
+            doc.parent = Document.objects.get_by_path(self.kwargs["path"])
         except ObjectDoesNotExist:
-            raise Http404
+            pass
+        return doc
 
     def get(self, request, *args, **kwargs):
         """ Handles GET requests. """
@@ -61,12 +63,7 @@ class DocUpdate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         revision_form = RevisionInlineFormset(
-            request.POST, instance=self.object)
-
-        if form.is_valid():
-            self.object = form.save()
-            revision_form.instance = self.object
-            revision_form.save()
+            request.POST, instance=self.object, author=request.user)
 
         if (form.is_valid() and revision_form.is_valid()):
             return self.form_valid(form, revision_form)
@@ -80,6 +77,26 @@ class DocUpdate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
         revision_form.save()
 
         return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form, revision_form):
+        """
+        Called if a form is invalid. Re-renders the context data with the
+        data-filled forms and errors.
+        """
+        return self.render_to_response(
+            self.get_context_data(form=form,
+                                  revision_form=revision_form))
+
+
+class DocUpdate(DocCreate):
+
+    """ Edit a document. """
+
+    def get_object(self):
+        try:
+            return Document.objects.get_by_path(self.kwargs["path"])
+        except ObjectDoesNotExist:
+            raise Http404
 
 
 class LoginView(generic.edit.FormView):
