@@ -3,8 +3,12 @@
 {% block title %}Edit Document{% endblock %}
 
 {% block content %}
-  Edit this document
-  <form action="{% url 'spaces:document_edit' path=object.path %}" method="post">
+  {% if document.id %}
+    Edit this document
+  {% else %}
+    Add new document
+  {% endif %}
+  <form action="{{ request.get_full_path }}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     {{ revision_form.as_p }}
