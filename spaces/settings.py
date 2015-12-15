@@ -6,7 +6,7 @@ EDITOR_GROUP_NAME = "Viewer"
 
 # Reserved root slug names
 RESERVED_ROOT_URLS = [
-    'login',
+    'account',
     'user',
     's',
     'reports',
