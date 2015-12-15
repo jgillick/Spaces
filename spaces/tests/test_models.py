@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
 
-from spaces.models import Space, Document, Revision, \
-                          ROOT_SPACE_NAME, USER_SPACE_NAME, ROOT_DOC_NAME
+from spaces.models import (Space, Document, Revision,
+    ROOT_SPACE_NAME, USER_SPACE_NAME, ROOT_DOC_NAME)
 
 
 class SpaceTestCase(TestCase):
@@ -28,7 +29,7 @@ class SpaceTestCase(TestCase):
 
     def test_cannot_create_existing_space(self):
         """ Cannot create a space with the same path or name """
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValidationError):
             Space.objects.create(name='My Space!', path='mine')
 
 
@@ -38,7 +39,10 @@ class DocumentTestCase(TestCase):
     """
 
     def setUp(self):
+        self.root_space = Space.objects.get(name=ROOT_SPACE_NAME)
         self.space = Space.objects.create(name='My Space!', path='mine')
+        self.space_other = Space.objects.create(
+            name='Another space', path='other')
 
         self.user = get_user_model().objects.create_user(
             username='bob',
@@ -65,12 +69,11 @@ class DocumentTestCase(TestCase):
             path='quick/brown/fox',
             space=self.space)
 
-        # Root document
-        root = Space.objects.get(name=ROOT_SPACE_NAME)
-        self.doc_root = Document.objects.create(
-            title='Root doc',
-            path='hello',
-            space=root)
+        # Other document
+        self.doc_other = Document.objects.create(
+            title='Other document',
+            path='other-doc',
+            space=self.space_other)
 
     def test_create_document_without_a_space(self):
         """ All documents belong in a space """
@@ -82,11 +85,29 @@ class DocumentTestCase(TestCase):
         """
         Cannot create a document with the same path under the same parent
         """
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValidationError):
             Document.objects.create(
                 title='Bar',
                 path='bar',
                 parent=self.doc_foo)
+
+    def test_can_edit_root_document(self):
+        """
+        The document attached to __ROOT__ can be edited
+        """
+        doc = Document.objects.get_by_path('', create=True)
+        doc.title = "Root Doc"
+        doc.save()
+
+    def test_no_document_past_root(self):
+        """
+        No hierarchy is allowed under the __ROOT__ space
+        """
+        with self.assertRaises(ValidationError):
+            Document.objects.create(
+                title="Nested doc",
+                path="hello",
+                space=self.root_space)
 
     def test_can_create_same_under_other_parent(self):
         """ Can create a document with the same path under another parent """
@@ -97,11 +118,11 @@ class DocumentTestCase(TestCase):
 
     def test_root_space_doc_path(self):
         """
-        Get the space root document by path
+        Get the root document of a space by path
         """
         doc = Document.objects.get_by_path('mine')
         self.assertEqual(doc.space.path, self.space.path)
-        self.assertEqual(doc.path, ROOT_DOC_NAME)
+        self.assertEqual(doc.path, '')
         self.assertEqual(doc.parent, None)
 
     def test_path_query_finder(self):
@@ -116,12 +137,12 @@ class DocumentTestCase(TestCase):
         doc = Document.objects.get_by_path('mine/foo/bar///baz/')
         self.assertEqual(doc, self.doc_baz)
 
-    def test_leading_slash_matches_root(self):
+    def test_empty_path_matches_root(self):
         """
-        If a path has a leading slash, it matches the root space
+        If a path is empty, it matches the root space
         """
-        doc = Document.objects.get_by_path('/hello')
-        self.assertEqual(doc, self.doc_root)
+        doc = Document.objects.get_by_path('')
+        self.assertEqual(doc.space, self.root_space)
 
     def test_space_in_inferred_from_parent(self):
         """
@@ -137,7 +158,7 @@ class DocumentTestCase(TestCase):
             Document.objects.create(
                 title='Wrong  parent',
                 path='wrong',
-                parent=self.doc_root,
+                parent=self.doc_other,
                 space=self.space)
 
     def test_create_with_full_path(self):
@@ -150,6 +171,12 @@ class DocumentTestCase(TestCase):
 
         self.assertEqual(doc.path, 'foo')
         self.assertEqual(doc.full_path(), "%s/%s" % (self.space.path, uri))
+
+    def test_get_full_path(self):
+        """
+        Check that a document generates it's full path correctly.
+        """
+        self.assertEqual(self.doc_baz.full_path(), 'mine/foo/bar/baz')
 
     def test_first_doc_cannot_match_space(self):
         """
@@ -207,11 +234,11 @@ class UserSpaceTestCase(TestCase):
 
     def test_space_path(self):
         """
-        Ensure that documents cannot be put in the root path.
+        Ensure that documents cannot be put in the user root path.
         That part of the path is reserved for the username:
         /user/<username>/
         """
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ObjectDoesNotExist):
             doc = Document.objects.create(
                 title='Bad',
                 path='user/not_a_user',
@@ -224,7 +251,7 @@ class RevisionTestCase(TestCase):
     """
 
     def setUp(self):
-        space = Space.objects.get(path='')
+        space = Space.objects.create(name='My Space!', path='mine')
         user = get_user_model().objects.create_user(
             username='bob',
             email='bob@dobbs.com',
