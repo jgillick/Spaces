@@ -1,13 +1,17 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.test import Client, TestCase
+from django.test import Client, RequestFactory, TestCase
 
 from spaces.models import Space, Document, Revision
+from spaces import views
 
 
 class RevisionViewTest(TestCase):
 
     def setUp(self):
+        self.factory = RequestFactory()
+
         self.space = Space.objects.create(name='My Space!', path='mine')
 
         # Users
@@ -29,21 +33,68 @@ class RevisionViewTest(TestCase):
             content='First version',
             author=self.author,
             doc=self.doc)
-        Revision.objects.create(
+        rev = Revision.objects.create(
             content='Second version',
             author=self.author,
             doc=self.doc)
 
+        self.other_doc = Document.objects.create(
+            title='Other',
+            path='other',
+            space=self.space)
+
+        self.test_data = {
+            'title': 'hello',
+            'path': 'foo',
+            'revision_set-TOTAL_FORMS': 1,
+            'revision_set-INITIAL_FORMS': 1,
+            'revision_set-MIN_NUM_FORMS': 1,
+            'revision_set-MAX_NUM_FORMS': 1,
+            'revision_set-0-content': 'hello world',
+            'revision_set-0-id': rev.id,
+            'revision_set-0-doc': self.doc.id
+        }
+
+    def post_update(self, data):
+        """ Send an update POST request to the Foo document """
+        request = self.factory.post('/mine/foo/-edit', data)
+        request.user = self.author
+        return views.DocUpdate.as_view()(request, path="mine/foo")
+
     def test_correct_revisions_is_shown(self):
+        """ The latest revision should be shown for a document. """
         response = self.client.get(
             reverse('spaces:document', args=('mine/foo',)))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Second version")
 
-    def test_authed_user_is_author(self):
-        # response = self.client.post(
-        #     reverse('spaces:document_create', args=('mine/foo',)))
-        pass
+    def test_auth_required_to_create(self):
+        """ Only authenticated users can create a document. """
+        response = self.client.get(
+            reverse('spaces:document_create', kwargs={"path": "mine/foo/"}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['location'].startswith(settings.LOGIN_URL))
+
+        response = self.client.post(
+            reverse('spaces:document_create', kwargs={"path": "mine/foo/"}),
+            self.test_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['location'].startswith(settings.LOGIN_URL))
+
+    def test_auth_required_to_edit(self):
+        """ Only authenticated users can edit a document. """
+        response = self.client.get(
+            reverse('spaces:document_edit', kwargs={"path": "mine/foo/"}))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['location'].startswith(settings.LOGIN_URL))
 
     def test_spoof_author_user(self):
-        pass
+        """ Should not be able to spoof the author. """
+        self.test_data["revision_set-0-author"] = self.other_user.id
+
+        response = self.post_update(self.test_data)
+        rev = Revision.objects.last()
+        self.assertEqual(rev.author.id, self.author.id)
+
+
