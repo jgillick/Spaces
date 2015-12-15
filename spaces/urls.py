@@ -7,10 +7,10 @@ urlpatterns = [
     # url(r'^user/(?P<username>)/(?P<uri>.*)$', views.UserDocView.as_view(), name='user_doc'),
 
     url(
-        r'^(?P<path>.*/)?-edit$',
+        r'^(?P<path>.*/)?_edit$',
         views.DocUpdate.as_view(), name='document_edit'),
     url(
-        r'^(?P<path>.*/)?-add$',
+        r'^(?P<path>.*/)?_add$',
         views.DocCreate.as_view(), name='document_create'),
     url(
         r'^(?P<path>.*)$',
