@@ -7,7 +7,7 @@
   {% if document %}
     <h1>{{document.title}}</h1>
     {% if document.latest %}
-      {{document.latest.content}}
+      {{ document.latest.content|safe }}
     {% else %}
       Add content!
     {% endif %}

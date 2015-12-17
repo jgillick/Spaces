@@ -12,6 +12,9 @@
     {% csrf_token %}
     {{ form.as_p }}
     {{ revision_form.as_p }}
+    <script>
+        CKEDITOR.replace('id_revision_set-0-content');
+    </script>
     <p>
       <button type="submit">Save</button>
     </p>
