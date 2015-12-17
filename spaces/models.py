@@ -15,7 +15,6 @@ from .utils import normalize_path, to_slug
 
 ROOT_SPACE_NAME = '__ROOT__'
 USER_SPACE_NAME = '__USER__'
-ROOT_DOC_NAME = '__ROOT__'
 
 
 class Space(models.Model):
@@ -54,7 +53,7 @@ class Space(models.Model):
         """
         doc, created = Document.objects.get_or_create(
             path='',
-            title=ROOT_DOC_NAME,
+            title=self.name,
             space=self,
             space_doc=True,
             parent=None)

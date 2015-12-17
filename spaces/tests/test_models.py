@@ -4,7 +4,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from spaces.models import (Space, Document, Revision,
-    ROOT_SPACE_NAME, USER_SPACE_NAME, ROOT_DOC_NAME)
+    ROOT_SPACE_NAME, USER_SPACE_NAME)
 
 
 class SpaceTestCase(TestCase):
