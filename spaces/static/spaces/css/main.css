@@ -1,0 +1,105 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Roboto Slab', 'Metrophobic', 'Helvetica Neue', Helvetica, Arial, serif;
+  font-size: 18px;
+  line-height: 1.65;
+  background: #eee;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Roboto Condensed';
+  font-weight: 300;
+}
+
+/*
+  Header
+*/
+body > header {
+  position: relative;
+  background: #1fa67a; /* #580F9D;*//* #80589D;*/
+  color: #fff;
+  min-height: 160px;
+  padding: 20px 60px 0;
+  margin: 0;
+}
+
+body > header h1 {
+  margin: 0; padding: 0;
+}
+
+body > header nav {
+  width: 840px;
+  margin: 0 auto;
+  position: relative;
+}
+body > header nav ul {
+  list-style-type: none;
+  position: absolute;
+  top: -15px; right: 0;
+  margin: 0;
+  padding: 0;
+}
+
+body > header nav li {
+  display: inline-block;
+  margin: 0 5px;
+}
+body > header nav a {
+  background: #fff;
+  color: #1fa67a;
+
+  text-decoration: none;
+  display: inline-block;
+  width: 45px;
+  height: 45px;
+  border-radius: 25px;
+  overflow: hidden;
+  text-indent: 100px;
+  position: relative;
+  box-shadow: 1px 1px 5px #126349;
+}
+body > header nav a:hover {
+  background: #E8F6F1;
+}
+body > header nav a:before {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 0; right: 0;
+  text-indent: 0;
+  text-align: center;
+  line-height: 45px;
+}
+
+body > header nav ul.page {
+  top: 50px;
+  right: -55px;
+}
+body > header ul.page li {
+  display: block;
+  margin: 3px 0;
+}
+body > header ul.page li.secondary a {
+  height: 30px;
+  width: 30px;
+  margin: 0 8px;
+}
+body > header ul.page li.secondary a:before {
+  line-height: 30px;
+}
+
+/*
+  Main Content Area
+s*/
+.main {
+  position: relative;
+  width: 800px;
+  margin: -60px auto 0;
+  background: #fff;
+  padding: 10px 20px 80px;
+  box-shadow: 1px 1px 5px #AAA;
+}

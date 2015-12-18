@@ -1,6 +1,7 @@
 {% extends "spaces/layout.html" %}
 
-{% block title %}My Document{% endblock %}
+
+{% block page_title %}{% block title %}{{document.title}}{% endblock %}{% endblock %}
 
 {% block content %}
 

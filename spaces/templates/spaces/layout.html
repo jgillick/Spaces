@@ -3,14 +3,42 @@
 <html lang="en">
 <head>
   <title>{% block title %}{% endblock %}</title>
-  <script src="{% static 'spaces/ckeditor/ckeditor.js' %}"></script>
 
-  <link rel="stylesheet" href="{% static 'spaces/highlight/styles/github.css' %}">
+  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Roboto' />
+  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Roboto+Slab' />
+  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Roboto+Condensed' />
+  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Metrophobic' />
+
+  <link rel="stylesheet" type='text/css' href="{% static 'spaces/font-awesome/css/font-awesome.min.css' %}" />
+  <link rel="stylesheet" type='text/css' href="{% static 'spaces/css/main.css' %}" />
+  <link rel="stylesheet" type='text/css' href="{% static 'spaces/highlight/styles/github.css' %}" />
+
+  <script src="{% static 'spaces/ckeditor/ckeditor.js' %}"></script>
   <script src="{% static 'spaces/highlight/highlight.pack.js' %}"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 </head>
 
 <body>
+  <header>
+    <h1>Spaces</h1>
+    <nav>
+      <ul class="global">
+        <li>
+          <a href="./_edit" class="fa fa-plus fa-lg" title="Add">Add</a>
+        </li>
+      </ul>
+      <ul class="page">
+        <li class="primary">
+          <a href="./_add" class="fa fa-pencil fa" title="Edit">Edit</a>
+        </li>
+        <li class="secondary">
+          <a href="./_info" class="fa fa-info fa" title="Edit">Edit</a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+  <div class="main">
     {% block content %}{% endblock %}
+  </div>
 </body>
 </html>

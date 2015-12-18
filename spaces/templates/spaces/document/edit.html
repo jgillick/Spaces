@@ -1,6 +1,6 @@
 {% extends "spaces/layout.html" %}
 
-{% block title %}Edit Document{% endblock %}
+{% block page_title %}{% block title %}Edit Document{% endblock %}{% endblock %}
 
 {% block content %}
   {% if document.id %}
