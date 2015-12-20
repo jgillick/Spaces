@@ -8,7 +8,7 @@ from .models import Document, Revision
 class DocumentForm(forms.ModelForm):
 
     class Meta:
-        fields = ['title', 'path']
+        fields = ['title', 'space', 'path']
         model = Document
 
 
@@ -23,9 +23,10 @@ class RevisionFormset(BaseInlineFormSet):
         self.author = kwargs.pop('author', None)
         super(RevisionFormset, self).__init__(*args, **kwargs)
 
-        if self.author is not None:
-            for form in self.forms:
-                if form.instance.pk is None:
+        # Setup values
+        for form in self.forms:
+            if form.instance.pk is None:
+                if self.author is not None:
                     form.instance.author = self.author
 
 

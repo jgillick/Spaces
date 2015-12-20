@@ -32,11 +32,14 @@ class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
     template_name = 'spaces/document/edit.html'
 
     def get_object(self):
-        doc = Document()
+        doc = Document(path=self.kwargs["path"])
+
         try:
             doc.parent = Document.objects.get_by_path(self.kwargs["path"])
         except ObjectDoesNotExist:
             pass
+
+        doc.path = doc.full_path(inc_space=False)
         return doc
 
     def get(self, request, *args, **kwargs):
@@ -94,7 +97,9 @@ class DocUpdate(DocCreate):
 
     def get_object(self):
         try:
-            return Document.objects.get_by_path(self.kwargs["path"])
+            doc = Document.objects.get_by_path(self.kwargs["path"])
+            doc.path = doc.full_path(inc_space=False)
+            return doc
         except ObjectDoesNotExist:
             raise Http404
 

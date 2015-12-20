@@ -93,6 +93,13 @@ class Document(models.Model):
             ("view_document", "Can view a document"),
         )
 
+    def __init__(self, *args, **kwargs):
+        super(Document, self).__init__(*args, **kwargs)
+
+        # Setup path
+        if "path" in kwargs:
+            self.set_path(kwargs["path"])
+
     def __unicode__(self):
         return self.title
 
@@ -109,15 +116,15 @@ class Document(models.Model):
         except ObjectDoesNotExist:
             return False
 
-    def full_path(self):
-        """ The full path to this document, from the space forward. """
+    def full_path(self, inc_space=True):
+        """ The full path to this document. """
         uri = self.path
         parent = self.parent
         while parent is not None:
             uri = path.join(parent.path, uri)
             parent = parent.parent
 
-        if self.space.name != ROOT_SPACE_NAME:
+        if inc_space and self.space.name != ROOT_SPACE_NAME:
             uri = path.join(self.space.path, uri)
 
         return uri
@@ -125,6 +132,22 @@ class Document(models.Model):
     def get_absolute_url(self):
         """ Get the absolute URL route to the document. """
         return reverse('spaces:document', kwargs={'path': self.full_path()})
+
+    def set_path(self, path):
+        """ Take a path and set the space and parent """
+
+        path = normalize_path(self.path).split("/")
+
+        if not self.has_space():
+            self.space = Space.objects.get(path=path.pop(0))
+
+        parentPath = path[0:-1]
+        self.path = path[-1]
+
+        self.parent = Document.objects.get_by_path(
+            parentPath,
+            space=self.space,
+            create=True)
 
     def full_clean(self, override_path_normalization=False, *args, **kwargs):
         """ Custom clean method """
@@ -142,14 +165,7 @@ class Document(models.Model):
 
         # Convert path to parent node
         if self.path.find('/') > -1:
-            path = normalize_path(self.path).split("/")
-            parentPath = path[0:-1];
-
-            self.path = path[-1]
-            self.parent = Document.objects.get_by_path(
-                parentPath,
-                space=self.space,
-                create=True)
+            self.set_path(self.path)
 
         # Normalize path
         elif not self.space_doc:
