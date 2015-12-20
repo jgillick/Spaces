@@ -10,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist, \
 from django.core.urlresolvers import reverse
 from django.db import models
 
-from .managers import DocumentManager
+from .managers import DocumentManager, SpaceManager
 from .utils import normalize_path, to_slug
 
 
@@ -18,6 +18,8 @@ class Space(models.Model):
 
     ROOT_SPACE_NAME = '__ROOT__'
     USER_SPACE_NAME = '__USER__'
+
+    objects = SpaceManager()
 
     """
     A general Space.
@@ -88,7 +90,7 @@ class Document(models.Model):
 
     objects = DocumentManager()
 
-    path = models.CharField('URL Slug', max_length=100, blank=True)
+    path = models.CharField(max_length=100, blank=True)
     title = models.CharField(max_length=100)
     space_doc = models.BooleanField(
         "Is this a space's root document",
@@ -105,9 +107,10 @@ class Document(models.Model):
     def __init__(self, *args, **kwargs):
         super(Document, self).__init__(*args, **kwargs)
 
-        # # Setup path
-        # if "path" in kwargs:
-        #     self.set_path(kwargs["path"])
+        # Setup path
+        if ("path" in kwargs and not self.has_space()):
+            # self.set_path(kwargs["path"])
+            self.space = Space.objects.get_by_path(kwargs["path"])
 
     def __unicode__(self):
         return self.title
@@ -142,7 +145,7 @@ class Document(models.Model):
         """ Get the absolute URL route to the document. """
         return reverse('spaces:document', kwargs={'path': self.full_path()})
 
-    def set_path(self, path):
+    def _set_path(self, path):
         """ Take a path and set the space and parent """
 
         path = normalize_path(self.path).split("/")
@@ -174,7 +177,7 @@ class Document(models.Model):
 
         # Convert path to parent node
         if self.path.find('/') > -1:
-            self.set_path(self.path)
+            self._set_path(self.path)
 
         # Normalize path
         elif not self.space_doc:

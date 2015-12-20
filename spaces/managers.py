@@ -8,6 +8,29 @@ from django.db import models
 from .utils import normalize_path
 
 
+class SpaceManager(models.Manager):
+    """ Custom space queryset object """
+
+    def get_by_path(self, path):
+        """
+        Return the space for a path string.
+        """
+        from .models import Space
+
+        if type(path) is not list:
+            path = normalize_path(path).split('/')
+
+        rootPath = path.pop(0)
+        if rootPath:
+            try:
+                return Space.objects.get(path=rootPath)
+            except ObjectDoesNotExist:
+                raise ObjectDoesNotExist(
+                    "Space at %s does not exist" % rootPath)
+        else:
+            Space.objects.get(name=Space.ROOT_SPACE_NAME)
+
+
 class DocumentManager(models.Manager):
     """ Custom document queryset object """
 
