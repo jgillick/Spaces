@@ -4,18 +4,21 @@
 <head>
   <title>{% block title %}{% endblock %}</title>
 
-  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Roboto' />
-  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Roboto+Slab' />
-  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Roboto+Condensed' />
-  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Metrophobic' />
+  {# Fonts #}
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,100,300|Roboto+Slab:400,100,300|Roboto+Condensed:400,300|Open+Sans:400normal|Raleway:400normal|Metrophobic:400normal' rel='stylesheet' type='text/css'  />
 
-  <link rel="stylesheet" type='text/css' href="{% static 'spaces/font-awesome/css/font-awesome.min.css' %}" />
-  <link rel="stylesheet" type='text/css' href="{% static 'spaces/css/main.css' %}" />
-  <link rel="stylesheet" type='text/css' href="{% static 'spaces/highlight/styles/github.css' %}" />
+  {# Libraries #}
+  <link href="{% static 'spaces/lib/font-awesome/css/font-awesome.min.css' %}" rel='stylesheet' type='text/css'  />
+  <link href="{% static 'spaces/lib/highlight/styles/github.css' %}" rel='stylesheet' type='text/css'  />
 
-  <script src="{% static 'spaces/ckeditor/ckeditor.js' %}"></script>
-  <script src="{% static 'spaces/highlight/highlight.pack.js' %}"></script>
+  <script src="{% static 'spaces/lib/jquery/jquery-2.1.4.min.js' %}"></script>
+  <script src="{% static 'spaces/lib/ckeditor/ckeditor.js' %}"></script>
+  <script src="{% static 'spaces/lib/highlight/highlight.pack.js' %}"></script>
   <script>hljs.initHighlightingOnLoad();</script>
+
+  {# Our CSS/JS #}
+  <link href="{% static 'spaces/css/main.css' %}" rel='stylesheet' type='text/css'  />
+  <script src="{% static 'spaces/js/main.js' %}"></script>
 </head>
 
 <body>
@@ -24,16 +27,16 @@
     <nav>
       <ul class="global">
         <li>
-          <a href="./_edit" class="fa fa-plus fa-lg" title="Add">Add</a>
+          {% if document %}
+            <a href="{% url 'spaces:document_create' path=document.full_path %}" class="fa fa-plus fa-lg" title="Add">
+              Add</a>
+          {% else %}
+            <a href="{% url 'spaces:document_create' path=request.resolver_match.kwargs.path %}" class="fa fa-plus fa-lg" title="Add">Add</a>
+          {% endif %}
         </li>
       </ul>
       <ul class="page">
-        <li class="primary">
-          <a href="./_add" class="fa fa-pencil fa" title="Edit">Edit</a>
-        </li>
-        <li class="secondary">
-          <a href="./_info" class="fa fa-info fa" title="Edit">Edit</a>
-        </li>
+        {% block page_nav %}{% endblock %}
       </ul>
     </nav>
   </header>
