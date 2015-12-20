@@ -47,7 +47,7 @@
       </div>
 
       {% if document.document_set.count %}
-        <section class="child-pages">
+        <footer class="child-pages">
           <h1>Child Documents</h1>
           <ul>
           {% for doc in document.document_set.all %}
@@ -56,7 +56,7 @@
             </li>
           {% endfor %}
           </ul>
-        </section>
+        </footer>
       {% endif %}
     {% else %}
       <header>

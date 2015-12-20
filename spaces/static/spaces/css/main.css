@@ -21,7 +21,7 @@ body > header nav a:before { position: absolute; top: 0; bottom: 0; left: 0; rig
 body > header nav ul.page { top: 25px; right: -55px; }
 body > header nav ul.page li { display: block; margin: 3px 0; height: 50px; }
 body > header nav ul.page li.secondary { height: 30px; }
-body > header nav ul.page li.secondary a { height: 30px; width: 30px; margin: 0 8px; }
+body > header nav ul.page li.secondary a:link, body > header nav ul.page li.secondary a:visited { height: 30px; width: 30px; margin: 0 8px; }
 body > header nav ul.page li.secondary a:before { line-height: 30px; }
 body > header nav ul.page li.form-action { overflow: hidden; }
 body > header nav ul.page li.form-action a { position: absolute; right: 60px; transition: right 0.5s; }
@@ -34,10 +34,10 @@ body.loaded > header ul.page li.form-action a { right: 0; }
 
 /* ############ Document ############
 */
-article > header { margin: 15px 0; }
+article > header { margin: 15px 0; border-bottom: 1px solid #e9e9e9; }
 article > header h1 { margin: 0; }
 article > header p.meta { font-size: 14px; color: #999; margin: 0; font-family: 'Roboto'; font-weight: 200; }
-article .content { border: solid #e9e9e9; border-width: 1px 0; padding: 20px 0; }
-article section.child-pages { font-size: 14px; }
+article .content { padding: 20px 0; }
+article footer.child-pages { font-size: 14px; border-top: 1px solid #e9e9e9; }
 
 /*# sourceMappingURL=main.css.map */
