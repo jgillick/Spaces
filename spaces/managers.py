@@ -24,7 +24,7 @@ class DocumentManager(models.Manager):
                     that do not exist
         """
 
-        from .models import Space, ROOT_SPACE_NAME
+        from .models import Space
 
         queryset = self.get_queryset()
 
@@ -41,9 +41,8 @@ class DocumentManager(models.Manager):
                     "Document at %s does not exist" % rootPath)
 
         # Follow the path
-        doc = None
-        curPath = space.path
         doc = space.get_root_document()
+        curPath = space.path
         if len(path):
             for p in path:
                 curPath += "/%s" % p
@@ -54,10 +53,10 @@ class DocumentManager(models.Manager):
                         space=space)
                 except ObjectDoesNotExist:
                     if create:
-                        doc = self.create(title=p, path=p, parent=doc, space=space)
+                        doc = self.create(
+                            title=p, path=p, parent=doc, space=space)
                     else:
-                        raise ObjectDoesNotExist("Document at %s does not exist" % curPath)
-        else:
-            doc = space.get_root_document()
+                        raise ObjectDoesNotExist(
+                            "Document at %s does not exist" % curPath)
 
         return doc

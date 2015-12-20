@@ -3,8 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
 
-from spaces.models import (Space, Document, Revision,
-    ROOT_SPACE_NAME, USER_SPACE_NAME)
+from spaces.models import Space, Document, Revision
 
 
 class SpaceTestCase(TestCase):
@@ -15,11 +14,11 @@ class SpaceTestCase(TestCase):
 
     def test_root_space_should_be_present(self):
         """ The default application should have a __ROOT__ space """
-        Space.objects.get(name=ROOT_SPACE_NAME)
+        Space.objects.get(name=Space.ROOT_SPACE_NAME)
 
     def test_user_space_should_be_present(self):
         """ The default application should have a __USER__ space """
-        Space.objects.get(name=USER_SPACE_NAME)
+        Space.objects.get(name=Space.USER_SPACE_NAME)
 
     def test_convert_path_to_slug(self):
         """ Convert special characters in path """
@@ -39,7 +38,7 @@ class DocumentTestCase(TestCase):
     """
 
     def setUp(self):
-        self.root_space = Space.objects.get(name=ROOT_SPACE_NAME)
+        self.root_space = Space.objects.get(name=Space.ROOT_SPACE_NAME)
         self.space = Space.objects.create(name='My Space!', path='mine')
         self.space_other = Space.objects.create(
             name='Another space', path='other')
@@ -230,7 +229,7 @@ class UserSpaceTestCase(TestCase):
     """
 
     def setUp(self):
-        self.space = Space.objects.get(name=USER_SPACE_NAME)
+        self.space = Space.objects.get(name=Space.USER_SPACE_NAME)
 
     def test_space_path(self):
         """

@@ -13,11 +13,11 @@ from django.db import models
 from .managers import DocumentManager
 from .utils import normalize_path, to_slug
 
-ROOT_SPACE_NAME = '__ROOT__'
-USER_SPACE_NAME = '__USER__'
-
 
 class Space(models.Model):
+
+    ROOT_SPACE_NAME = '__ROOT__'
+    USER_SPACE_NAME = '__USER__'
 
     """
     A general Space.
@@ -39,7 +39,7 @@ class Space(models.Model):
         """
         Return the root document to a space for a specific user.
         """
-        user_space = Space.objects.get(name=USER_SPACE_NAME)
+        user_space = Space.objects.get(name=Space.USER_SPACE_NAME)
         doc, created = Document.objects.get_or_create(
             path=user.username,
             space=user_space,
@@ -51,12 +51,21 @@ class Space(models.Model):
         """
         Return the root document for the space.
         """
-        doc, created = Document.objects.get_or_create(
-            path='',
-            title=self.name,
-            space=self,
-            space_doc=True,
-            parent=None)
+        # Can't use get_or_create, since we don't want to find by title
+        try:
+            doc = Document.objects.get(
+                path="",
+                space=self,
+                space_doc=True,
+                parent=None)
+        except ObjectDoesNotExist:
+            doc = Document.objects.create(
+                title=self.name,
+                path="",
+                space=self,
+                space_doc=True,
+                parent=None
+            )
 
         return doc
 
@@ -96,9 +105,9 @@ class Document(models.Model):
     def __init__(self, *args, **kwargs):
         super(Document, self).__init__(*args, **kwargs)
 
-        # Setup path
-        if "path" in kwargs:
-            self.set_path(kwargs["path"])
+        # # Setup path
+        # if "path" in kwargs:
+        #     self.set_path(kwargs["path"])
 
     def __unicode__(self):
         return self.title
@@ -124,7 +133,7 @@ class Document(models.Model):
             uri = path.join(parent.path, uri)
             parent = parent.parent
 
-        if inc_space and self.space.name != ROOT_SPACE_NAME:
+        if inc_space and self.space.name != Space.ROOT_SPACE_NAME:
             uri = path.join(self.space.path, uri)
 
         return uri
@@ -184,7 +193,7 @@ class Document(models.Model):
                 % self.space.path )
 
         # User Space: Cannot create a root document that is not a username
-        if self.space.name == USER_SPACE_NAME and self.parent is None:
+        if self.space.name == Space.USER_SPACE_NAME and self.parent is None:
             try:
                 get_user_model().objects.get(username=self.path)
             except ObjectDoesNotExist:
@@ -192,7 +201,7 @@ class Document(models.Model):
                     "Invalid username '%s'" % self.path)
 
         #  No hierarchy is allowed under the __ROOT__ space
-        if self.space.name == ROOT_SPACE_NAME and not self.space_doc:
+        if self.space.name == Space.ROOT_SPACE_NAME and not self.space_doc:
             raise ValidationError(
                 "Cannot put child pages under the root space")
 
