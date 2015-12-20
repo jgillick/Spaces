@@ -1,18 +1,73 @@
 {% extends "spaces/layout.html" %}
-
+{% load humanize %}
 
 {% block page_title %}{% block title %}{{document.title}}{% endblock %}{% endblock %}
 
+{% block page_nav %}
+  {% if document %}
+    <li>
+      <a href="{% url 'spaces:document_edit' path=document.full_path %}" class="fa fa-pencil fa" title="Edit">
+        Edit</a>
+    </li>
+    <li class="secondary">
+      <a href="./_info" class="fa fa-info fa" title="Edit">Edit</a>
+    </li>
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 
-  {% if document %}
-    <h1>{{document.title}}</h1>
-    {% if document.latest %}
-      {{ document.latest.content|safe }}
+  <article>
+    {% if document %}
+      <header>
+        <h1>{{document.title}}</h1>
+        <p class="meta">
+          {% if document.latest %}
+            {% if document.revision_set.count == 1 %}
+              Created by
+            {% else %}
+              Modified by
+            {% endif %}
+            {{document.latest.author.username }}
+            {{ document.latest.created_on|naturalday }}
+          {% endif %}
+        </p>
+      </header>
+
+      <div class="content">
+        {% if document.latest %}
+          {{ document.latest.content|safe }}
+        {% else %}
+          <p>
+            Nothing here yet,
+            <a href="{% url 'spaces:document_edit' path=request.resolver_match.kwargs.path %}">add</a>
+            some content!
+          </p>
+        {% endif %}
+      </div>
+
+      {% if document.document_set.count %}
+        <section class="child-pages">
+          <h1>Child Documents</h1>
+          <ul>
+          {% for doc in document.document_set.all %}
+            <li>
+              <a href="{% url 'spaces:document' path=doc.full_path %}">{{doc.title}}</a>
+            </li>
+          {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
     {% else %}
-      Add content!
+      <header>
+        <h1>No document here</h1>
+      </header>
+      <div class="content">
+        <p>
+          This document does not yet exist.
+          You should <a href="{% url 'spaces:document_create' path=request.resolver_match.kwargs.path %}">create</a> it!
+        </p>
+      </div>
     {% endif %}
-  {% else %}
-    No document here
-  {% endif %}
+  </article>
 {% endblock %}
