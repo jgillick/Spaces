@@ -32,41 +32,61 @@ class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
     template_name = 'spaces/document/edit.html'
 
     def get_object(self):
-        doc = Document(path=self.kwargs["path"])
+        path = self.kwargs["path"]
+        path += "/"
+        doc = Document(path=path)
 
         try:
-            doc.parent = Document.objects.get_by_path(self.kwargs["path"])
+            doc.parent = Document.objects.get_by_path(path)
         except ObjectDoesNotExist:
             pass
 
         doc.path = doc.full_path(inc_space=False)
         return doc
 
-    def get(self, request, *args, **kwargs):
-        """ Handles GET requests. """
+    def get_form_kwargs(self):
+        """ Add user to the kwargs sent to DocumentForm """
+        kwargs = super(DocCreate, self).get_form_kwargs()
+        kwargs["user"] = self.user
+        return kwargs
+
+    def setup_forms(self, request, post=None):
+        self.user = request.user
         self.object = self.get_object()
         rev_qs = self.object.revision_set.order_by('-created_on')
 
         if rev_qs.count():
             rev_qs = rev_qs.filter(pk=rev_qs[0].pk)
 
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
+        form = self.get_form(self.get_form_class())
         revision_form = RevisionInlineFormset(
+            post,
             instance=self.object,
-            queryset=rev_qs)
+            queryset=rev_qs,
+            user=self.user)
+
+        print 'Document'
+        print self.object
+        # if self.object.space:
+        #     form.initial['space'] = self.object.space
+
+        return (form, revision_form, )
+
+    def get(self, request, *args, **kwargs):
+        """ Handle GET requests. """
+        form, revision_form = self.setup_forms(request)
+
         return self.render_to_response(
-            self.get_context_data(form=form,
-                                  revision_form=revision_form))
+            self.get_context_data(form=form, revision_form=revision_form))
 
     def post(self, request, *args, **kwargs):
-        """ Handles POST requests. """
+        """ Handle POST requests. """
+        self.user = request.user
         self.object = self.get_object()
 
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
+        form = self.get_form(self.get_form_class())
         revision_form = RevisionInlineFormset(
-            request.POST, instance=self.object, author=request.user)
+            request.POST, instance=self.object, user=self.user)
 
         if (form.is_valid() and revision_form.is_valid()):
             return self.form_valid(form, revision_form)
