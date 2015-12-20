@@ -7,6 +7,12 @@ ADMIN_PASS='password'
 # Prerequisites
 apt-get update
 apt-get install -y python-pip python-dev vim
+gem install sass
+
+# Bin folder
+if [ ! -d /home/vagrant/bin ]; then
+  ln -s /vagrant/vagrant/bin /home/vagrant/bin
+fi
 
 # Mysql
 debconf-set-selections <<< "mysql-server mysql-server/root_password password \"''\""
@@ -18,7 +24,7 @@ mysql -u root -e "GRANT ALL PRIVILEGES ON spaces.* TO 'spaceman'@'localhost'; FL
 mysql -u root -e "GRANT ALL PRIVILEGES ON test_spaces.* TO 'spaceman'@'localhost'; FLUSH PRIVILEGES;"
 
 # Python libs
-pip install django mysql-python bpython 
+pip install django mysql-python bpython
 
 # Run migrations
 cd /vagrant/
@@ -40,7 +46,7 @@ touch $BASH_PROFILE
 DJANGO_COMPLETE=/home/vagrant/.django_bash_completion
 if [ ! -f $DJANGO_COMPLETE ]; then
   echo "Downloading .django_bash_completion..."
-  curl -s -o $DJANGO_COMPLETE https://raw.githubusercontent.com/django/django/master/extras/django_bash_completion 
+  curl -s -o $DJANGO_COMPLETE https://raw.githubusercontent.com/django/django/master/extras/django_bash_completion
   echo "source $DJANGO_COMPLETE" >> $BASH_PROFILE
 fi
 

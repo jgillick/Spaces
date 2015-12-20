@@ -1,0 +1,4 @@
+#!/bin/sh
+
+sass --style compact --watch /vagrant/spaces/static/spaces/sass/:/vagrant/spaces/static/spaces/css/ &
+python /vagrant/manage.py runserver 0.0.0.0:8000

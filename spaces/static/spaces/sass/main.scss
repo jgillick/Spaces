@@ -1,0 +1,187 @@
+$header-primary-color: #1fa67a;  // #580F9D #80589D;
+$header-fg: #fff;
+
+$nav-bnt-color: $header-primary-color;
+$nav-bnt-hover-color: #e8f6f1;
+$nav-bnt-shadow-color: #126349;
+
+$page-bg: #F9F7F3; // #eee
+$content-bg: #fff;
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Roboto Slab', 'Metrophobic', 'Helvetica Neue', Helvetica, Arial, serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.65;
+  background: $page-bg;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Roboto Condensed';
+  font-weight: 300;
+}
+
+a:link, a:visited {
+  color: #4078c0;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/*
+  ############
+  Header and Main Navigation
+  ############
+*/
+body > header {
+  position: relative;
+  background: $header-primary-color;
+  color: $header-fg;
+  min-height: 160px;
+  padding: 20px 60px 0;
+  margin: 0;
+
+  h1 {
+    margin: 0;
+    padding: 0;
+    line-height: 80px;
+    font-family: 'Roboto Slab';
+  }
+
+  nav {
+    width: 840px;
+    margin: 0 auto;
+    position: relative;
+
+    ul {
+      list-style-type: none;
+      position: absolute;
+      top: -32px; right: 0;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      display: inline-block;
+      margin: 0 5px;
+      transition: left 0.5s, right 0.5s, top 0.5s;
+    }
+
+    a:link {
+      background: $header-fg;
+      color: $nav-bnt-color;
+
+      text-decoration: none;
+      display: inline-block;
+      width: 45px;
+      height: 45px;
+      border-radius: 25px;
+      overflow: hidden;
+      text-indent: 100px;
+      position: relative;
+      box-shadow: 1px 1px 5px $nav-bnt-shadow-color;
+      transition: background .3s
+    }
+    a:hover {
+      background: $nav-bnt-hover-color;
+    }
+
+    // Icon positioning
+    a:before {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 0; right: 0;
+      text-indent: 0;
+      text-align: center;
+      line-height: 45px;
+    }
+  }
+
+  // Page specific nav
+  nav ul.page {
+    top: 25px;
+    right: -55px;
+
+    li {
+      display: block;
+      margin: 3px 0;
+      height: 50px;
+    }
+    li.secondary {
+      height: 30px;
+    }
+    li.secondary a {
+      height: 30px;
+      width: 30px;
+      margin: 0 8px;
+    }
+    li.secondary a:before {
+      line-height: 30px;
+    }
+
+    li.form-action {
+      overflow: hidden;
+
+      a {
+        position: absolute;
+        right: 60px;
+        transition: right 0.5s;
+      }
+    }
+  }
+}
+
+body.loaded > header ul.page li.form-action a {
+  right: 0;
+}
+
+/*
+  ############
+  Main Content Area
+  ############
+*/
+.main {
+  position: relative;
+  width: 800px;
+  margin: -60px auto 0;
+  background: $content-bg;
+  padding: 10px 20px 10px;
+  box-shadow: 1px 1px 5px #AAA;
+}
+
+/*
+  ############
+  Document
+  ############
+*/
+article {
+  > header {
+    margin: 15px 0;
+
+    h1 {
+      margin: 0;
+    }
+    p.meta {
+      font-size: 14px;
+      color: #999;
+      margin: 0;
+      font-family: 'Roboto';
+      font-weight: 200;
+    }
+  }
+  .content {
+    border: solid #e9e9e9;
+    border-width: 1px 0;
+    padding: 20px 0;
+  }
+  section.child-pages {
+    font-size: 14px;
+  }
+}
