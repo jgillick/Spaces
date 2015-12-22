@@ -4,7 +4,6 @@ from . import views
 app_name = 'spaces'
 urlpatterns = [
     url(r'^s/account/login$', views.LoginView.as_view(), name='login'),
-    # url(r'^user/(?P<username>)/(?P<uri>.*)$', views.UserDocView.as_view(), name='user_doc'),
 
     url(
         r'^_edit_/(?P<path>.*)?$',

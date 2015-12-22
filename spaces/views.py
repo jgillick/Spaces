@@ -164,15 +164,14 @@ class DocDelete(generic.edit.DeleteView):
         return super(DocDelete, self).post(request, *args, **kwargs)
 
 
-
 class LoginView(generic.edit.FormView):
 
     """ Login form. """
 
     form_class = AuthenticationForm
     template_name = 'spaces/login.html'
-    success_url = '/'
 
     def form_valid(self, form):
+        self.success_url = reverse('spaces:document', kwargs={"path": ""})
         login(self.request, form.get_user())
         return super(LoginView, self).form_valid(form)
