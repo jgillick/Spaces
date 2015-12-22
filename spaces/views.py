@@ -24,6 +24,12 @@ class DocView(generic.DetailView):
             document = None
         return document
 
+    def get_context_data(self, **kwargs):
+        context = super(DocView, self).get_context_data(**kwargs)
+        context["general_spaces"] = Space.objects.exclude(
+            name__in=[Space.ROOT_SPACE_NAME, Space.USER_SPACE_NAME])
+        return context
+
 
 class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
 
