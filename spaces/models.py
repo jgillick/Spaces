@@ -165,11 +165,16 @@ class Document(models.Model):
         else:
             self.path = ""
 
+        parentPath = filter(len, parentPath)  # remove empty path sections
         if parentPath:
             self.parent = Document.objects.get_by_path(
                 parentPath,
                 space=self.space,
                 create=True)
+
+    def view_count(self):
+        """ Return the number of times this document has been viewed. """
+        return self.accesslog_set.count()
 
     def full_clean(self, override_path_normalization=False, *args, **kwargs):
         """ Custom clean method """
@@ -224,7 +229,9 @@ class Document(models.Model):
         self.full_clean(override_path_normalization)
 
         # Save parents
-        if (self.parent is not None and self.parent.pk is None):
+        if (self.parent is not None
+                and self.parent.pk is None
+                and not self.is_space_root):
             self.parent.save()
             self.parent_id = self.parent.id
 

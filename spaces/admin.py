@@ -22,7 +22,7 @@ class RevisionInline(admin.StackedInline):
 
 class DocumentAdmin(admin.ModelAdmin):
     fields = ['title', 'path', 'space']
-    list_display = ['title', 'full_path']
+    list_display = ['title', 'full_path', 'view_count']
     inlines = [RevisionInline]
 
 
