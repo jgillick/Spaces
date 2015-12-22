@@ -55,11 +55,13 @@ class RevisionViewTest(TestCase):
             'revision_set-0-doc': self.doc.id
         }
 
-    def post_update(self, data):
-        """ Send an update POST request to the Foo document """
-        request = self.factory.post('/mine/foo/-edit', data)
+    def post_update(self, path, data):
+        """ Send an document edit POST request. """
+        request = self.factory.post(
+            reverse('spaces:document_create', kwargs={"path": path}),
+            data)
         request.user = self.author
-        return views.DocUpdate.as_view()(request, path="mine/foo")
+        return views.DocUpdate.as_view()(request, path=path)
 
     def test_correct_revisions_is_shown(self):
         """ The latest revision should be shown for a document. """
@@ -93,8 +95,16 @@ class RevisionViewTest(TestCase):
         """ Should not be able to spoof the author. """
         self.test_data["revision_set-0-author"] = self.other_user.id
 
-        response = self.post_update(self.test_data)
+        response = self.post_update("mine/foo/", self.test_data)
         rev = Revision.objects.last()
         self.assertEqual(rev.author.id, self.author.id)
 
+    def test_duplicate_path(self):
+        """ Cannot create a document with an existing path. """
+        self.client.login(username="bob", password="noneofyourbusiness")
+        response = self.client.post(
+            reverse('spaces:document_create', kwargs={"path": "mine/foo/"}),
+            self.test_data)
 
+        self.assertFormError(
+            response, "form", "path", "This path already exists")

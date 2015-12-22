@@ -1,4 +1,7 @@
+import re
+
 from django import forms
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms import BaseInlineFormSet
 from django.forms.models import inlineformset_factory
 
@@ -26,6 +29,27 @@ class DocumentForm(forms.ModelForm):
             self.fields['space'].label_from_instance = lambda obj: \
                 user.username if user and obj.name == Space.USER_SPACE_NAME \
                 else obj.name
+
+        # Set default path
+        self.initial["path"] = self.instance.full_path(inc_space=False) + "/"
+        # Remove double slashes
+        self.initial["path"] = re.sub(r'/+', '/', self.initial["path"])
+
+    def clean_path(self):
+        doc = None
+        path = self.cleaned_data["path"]
+
+        # Try to find another document with this pass
+        try:
+            doc = Document.objects.get_by_path(
+                path=path, space=self.instance.space
+            )
+            if not self.instance.pk or doc.pk != self.instance.pk:
+                raise ValidationError("This path already exists")
+        except ObjectDoesNotExist:
+            pass
+
+        return path
 
 
 class RevisionFormset(BaseInlineFormSet):

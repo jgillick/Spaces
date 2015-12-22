@@ -75,20 +75,31 @@ class DocumentTestCase(TestCase):
             space=self.space_other)
 
     def test_create_document_without_a_space(self):
-        """ All documents belong in a space """
+        """ All documents belong in a space. """
         with self.assertRaises(ValidationError):
             Document.objects.create(
                 title='Orphan', path='annie')
 
     def test_cannot_create_existing_document(self):
         """
-        Cannot create a document with the same path under the same parent
+        Cannot create a document with the same path under the same parent.
         """
         with self.assertRaises(ValidationError):
             Document.objects.create(
                 title='Bar',
                 path='bar',
                 parent=self.doc_foo)
+
+    def test_auto_save_parent_documents(self):
+        """
+        If parent documents are not saved, then save them automatically
+        """
+        d1 = Document(title='p1', path='p1', parent=self.doc_foo)
+        d2 = Document(title='p2', path='p2', parent=d1)
+        d3 = Document(title='p3', path='p3', parent=d2)
+
+        d3.save()
+        doc = Document.objects.get_by_path('mine/foo/p1/p2/p3')
 
     def test_can_edit_root_document(self):
         """
@@ -189,8 +200,8 @@ class DocumentTestCase(TestCase):
 
     def test_delete_document_in_path(self):
         """
-        When deleting a document in the middle of the path, all children should be assigned
-        to the parent above
+        When deleting a document in the middle of the path,
+        all children should be assigned to the parent above
         """
         self.doc_bar.delete()
         baz = Document.objects.get(path="baz")
@@ -203,6 +214,12 @@ class DocumentTestCase(TestCase):
         self.doc_bar.delete(with_children=True)
         with self.assertRaises(ObjectDoesNotExist):
             Document.objects.get_by_path('mine/foo/bar/baz')
+
+    def test_cannot_delete_root_document(self):
+        """ The root document of a space cannot be deleted. """
+        doc = self.space.get_root_document()
+        with self.assertRaises(ValidationError):
+            doc.delete()
 
     def test_special_characters_in_path(self):
         """

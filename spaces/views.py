@@ -4,6 +4,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.contrib.auth import login, mixins
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
 
 from .models import Space, Document, Revision
 from .forms import DocumentForm, RevisionInlineFormset
@@ -33,15 +34,8 @@ class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
 
     def get_object(self):
         path = self.kwargs["path"]
-        path += "/"
         doc = Document(path=path)
 
-        try:
-            doc.parent = Document.objects.get_by_path(path)
-        except ObjectDoesNotExist:
-            pass
-
-        doc.path = doc.full_path(inc_space=False)
         return doc
 
     def get_form_kwargs(self):
@@ -50,7 +44,7 @@ class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
         kwargs["user"] = self.user
         return kwargs
 
-    def setup_forms(self, request, post=None):
+    def _setup_forms(self, request, post=None):
         self.user = request.user
         self.object = self.get_object()
         rev_qs = self.object.revision_set.order_by('-created_on')
@@ -65,16 +59,11 @@ class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
             queryset=rev_qs,
             user=self.user)
 
-        print 'Document'
-        print self.object
-        # if self.object.space:
-        #     form.initial['space'] = self.object.space
-
         return (form, revision_form, )
 
     def get(self, request, *args, **kwargs):
         """ Handle GET requests. """
-        form, revision_form = self.setup_forms(request)
+        form, revision_form = self._setup_forms(request)
 
         return self.render_to_response(
             self.get_context_data(form=form, revision_form=revision_form))
@@ -83,6 +72,9 @@ class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
         """ Handle POST requests. """
         self.user = request.user
         self.object = self.get_object()
+
+        # Parent is defined by path
+        self.object.parent = None
 
         form = self.get_form(self.get_form_class())
         revision_form = RevisionInlineFormset(
@@ -118,10 +110,27 @@ class DocUpdate(DocCreate):
     def get_object(self):
         try:
             doc = Document.objects.get_by_path(self.kwargs["path"])
-            doc.path = doc.full_path(inc_space=False)
             return doc
         except ObjectDoesNotExist:
             raise Http404
+
+
+class DocDelete(generic.edit.DeleteView):
+
+    """ Delete a document. """
+
+    model = Document
+
+    def post(self, request, *args, **kwargs):
+        object = self.get_object()
+
+        # Redirect to the parent page
+        self.success_url = reverse(
+            'spaces:document',
+            kwargs={"path": object.parent.full_path()})
+
+        return super(DocDelete, self).post(request, *args, **kwargs)
+
 
 
 class LoginView(generic.edit.FormView):

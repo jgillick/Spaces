@@ -4,9 +4,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, \
-    PermissionDenied, \
-    ValidationError
+from django.core.exceptions import (
+    ObjectDoesNotExist, PermissionDenied, ValidationError)
 from django.core.urlresolvers import reverse
 from django.db import models
 
@@ -107,10 +106,11 @@ class Document(models.Model):
     def __init__(self, *args, **kwargs):
         super(Document, self).__init__(*args, **kwargs)
 
-        # Setup path
-        if ("path" in kwargs and not self.has_space()):
-            # self.set_path(kwargs["path"])
-            self.space = Space.objects.get_by_path(kwargs["path"])
+        # Process space and path
+        if not self.has_space() and self.parent and self.parent.has_space:
+            self.space = self.parent.space
+        if "path" in kwargs:
+            self._process_path(kwargs["path"])
 
     def __unicode__(self):
         return self.title
@@ -131,6 +131,7 @@ class Document(models.Model):
     def full_path(self, inc_space=True):
         """ The full path to this document. """
         uri = self.path
+
         parent = self.parent
         while parent is not None:
             uri = path.join(parent.path, uri)
@@ -145,21 +146,30 @@ class Document(models.Model):
         """ Get the absolute URL route to the document. """
         return reverse('spaces:document', kwargs={'path': self.full_path()})
 
-    def _set_path(self, path):
+    def _process_path(self, path):
         """ Take a path and set the space and parent """
 
         path = normalize_path(self.path).split("/")
 
         if not self.has_space():
-            self.space = Space.objects.get(path=path.pop(0))
+            spacePath = path.pop(0)
+            try:
+                self.space = Space.objects.get(path=spacePath)
+            except ObjectDoesNotExist:
+                # Space might not be included in path, add it back to path
+                path.insert(0, spacePath)
 
         parentPath = path[0:-1]
-        self.path = path[-1]
+        if len(path) >= 1:
+            self.path = path[-1]
+        else:
+            self.path = ""
 
-        self.parent = Document.objects.get_by_path(
-            parentPath,
-            space=self.space,
-            create=True)
+        if parentPath:
+            self.parent = Document.objects.get_by_path(
+                parentPath,
+                space=self.space,
+                create=True)
 
     def full_clean(self, override_path_normalization=False, *args, **kwargs):
         """ Custom clean method """
@@ -177,7 +187,7 @@ class Document(models.Model):
 
         # Convert path to parent node
         if self.path.find('/') > -1:
-            self._set_path(self.path)
+            self._process_path(self.path)
 
         # Normalize path
         elif not self.space_doc:
@@ -193,7 +203,7 @@ class Document(models.Model):
                 and self.path.lower() == self.space.path.lower()):
             raise ValidationError(
                 "This document cannot have the same path name as it's space (%s)"
-                % self.space.path )
+                % self.space.path)
 
         # User Space: Cannot create a root document that is not a username
         if self.space.name == Space.USER_SPACE_NAME and self.parent is None:
@@ -212,6 +222,12 @@ class Document(models.Model):
 
     def save(self, override_path_normalization=False, *args, **kwargs):
         self.full_clean(override_path_normalization)
+
+        # Save parents
+        if (self.parent is not None and self.parent.pk is None):
+            self.parent.save()
+            self.parent_id = self.parent.id
+
         super(Document, self).save(*args, **kwargs)
 
     def delete(self, with_children=False, *args, **kwargs):
@@ -226,6 +242,11 @@ class Document(models.Model):
             else:
                 d.parent = self.parent
                 d.save()
+
+        # Cannot delete root space document
+        if self.space_doc:
+            raise ValidationError(
+                "Cannot remove the root space document")
 
         super(Document, self).delete(*args, **kwargs)
 

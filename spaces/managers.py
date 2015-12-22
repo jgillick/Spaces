@@ -43,11 +43,11 @@ class DocumentManager(models.Manager):
                   <space>/<path>/<path>/<path>
             space: The space the path is under. If not set, the
                    first path segment is assumed to be the space
-            create: Creates document for path segments
-                    that do not exist
+            create: Creates document objects for path segments
+                    that do not exist. (these will not be saved)
         """
 
-        from .models import Space
+        from .models import Document, Space
 
         queryset = self.get_queryset()
 
@@ -61,7 +61,7 @@ class DocumentManager(models.Manager):
                 space = Space.objects.get(path=rootPath)
             except ObjectDoesNotExist:
                 raise ObjectDoesNotExist(
-                    "Document at %s does not exist" % rootPath)
+                    "Document at '%s' does not exist" % rootPath)
 
         # Follow the path
         doc = space.get_root_document()
@@ -76,7 +76,7 @@ class DocumentManager(models.Manager):
                         space=space)
                 except ObjectDoesNotExist:
                     if create:
-                        doc = self.create(
+                        doc = Document(
                             title=p, path=p, parent=doc, space=space)
                     else:
                         raise ObjectDoesNotExist(
