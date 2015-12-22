@@ -9,6 +9,8 @@ RESERVED_ROOT_URLS = [
     'account',
     'user',
     's',
-    'reports',
-    'admin'
+    'manage',
+    '_add_',
+    '_edit_',
+    '_delete_'
 ]
