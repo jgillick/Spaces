@@ -77,7 +77,7 @@ body > header {
 
     li {
       display: inline-block;
-      margin: 0 5px;
+      margin: 0 3px;
       transition: left 0.5s, right 0.5s, top 0.5s;
     }
 
@@ -113,6 +113,25 @@ body > header {
       text-align: center;
       line-height: 45px;
     }
+
+    // Smaller button
+    li.secondary {
+      height: 30px;
+    }
+    li.secondary a,
+    li.secondary button {
+      height: 30px;
+      width: 30px;
+      cursor: pointer;
+    }
+    li.secondary a:before,
+    li.secondary button:before {
+      line-height: 30px;
+    }
+    li.secondary button {
+      padding: 0;
+      border: none;
+    }
   }
 
   // Page specific nav
@@ -125,23 +144,10 @@ body > header {
       margin: 3px 0;
       height: 50px;
     }
-    li.secondary {
-      height: 30px;
-    }
+
     li.secondary a,
     li.secondary button {
-      height: 30px;
-      width: 30px;
       margin: 3px 8px;
-      cursor: pointer;
-    }
-    li.secondary a:before,
-    li.secondary button:before {
-      line-height: 30px;
-    }
-    li.secondary button {
-      padding: 0;
-      border: none;
     }
 
     li.slide-in {
