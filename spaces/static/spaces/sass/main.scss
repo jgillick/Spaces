@@ -1,3 +1,7 @@
+
+$max-width: 850px;
+$width-percent: 87%;
+
 $header-primary-color: #1fa67a;  // #580F9D #80589D;
 $header-fg: #fff;
 
@@ -48,31 +52,50 @@ body > header {
   position: relative;
   background: $header-primary-color;
   color: $header-fg;
-  min-height: 180px;
-  padding: 20px 60px 0;
   margin: 0;
-  box-sizing: border-box;
+
+  .wrapper {
+    padding: 20px 0 0;
+    min-height: 180px;
+    width: $width-percent;
+    max-width: $max-width;
+    margin: 0 auto;
+    position: relative;
+    box-sizing: border-box;
+  }
 
   h1 {
-    margin: 0;
     padding: 0;
+    height: 80px;
     line-height: 80px;
+    text-overflow: ellipsis;
     font-family: 'Roboto Slab';
+
+    a:link,
+    a:visited {
+      color: inherit;
+      border-radius: 10px;
+      padding: 5px;
+      margin: 0 0 0 -5px;
+      line-height: 1.2;
+      display: inline-block;
+      transition: background-color .2s;
+    }
+    a:hover {
+      text-decoration: none;
+      background: rgba(255, 255, 255, .1);
+    }
   }
 
   nav {
-    width: 100%;
-    max-width: 850px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 2;
-
     ul {
       list-style-type: none;
       position: absolute;
-      top: -32px; right: 0;
+      top: 75px;
+      right: 0;
       margin: 0;
       padding: 0;
+      z-index: 2;
     }
 
     li {
@@ -136,7 +159,7 @@ body > header {
 
   // Page specific nav
   nav ul.page {
-    top: 25px;
+    top: 125px;
     right: -55px;
 
     li {
@@ -175,8 +198,8 @@ body.loaded > header ul.page li.slide-in button {
 */
 .main {
   position: relative;
-  width: 87%;
-  max-width: 850px;
+  width: $width-percent;
+  max-width: $max-width;
   margin: -60px auto 30px;
   background: $content-bg;
   padding: 10px 30px 10px;

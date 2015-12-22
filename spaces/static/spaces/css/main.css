@@ -12,10 +12,12 @@ a:hover { text-decoration: underline; }
 
 /* ############ Header and Main Navigation ############
 */
-body > header { position: relative; background: #1fa67a; color: #fff; min-height: 180px; padding: 20px 60px 0; margin: 0; box-sizing: border-box; }
-body > header h1 { margin: 0; padding: 0; line-height: 80px; font-family: 'Roboto Slab'; }
-body > header nav { width: 100%; max-width: 850px; margin: 0 auto; position: relative; z-index: 2; }
-body > header nav ul { list-style-type: none; position: absolute; top: -32px; right: 0; margin: 0; padding: 0; }
+body > header { position: relative; background: #1fa67a; color: #fff; margin: 0; }
+body > header .wrapper { padding: 20px 0 0; min-height: 180px; width: 87%; max-width: 850px; margin: 0 auto; position: relative; box-sizing: border-box; }
+body > header h1 { padding: 0; height: 80px; line-height: 80px; text-overflow: ellipsis; font-family: 'Roboto Slab'; }
+body > header h1 a:link, body > header h1 a:visited { color: inherit; border-radius: 10px; padding: 5px; margin: 0 0 0 -5px; line-height: 1.2; display: inline-block; transition: background-color .2s; }
+body > header h1 a:hover { text-decoration: none; background: rgba(255, 255, 255, 0.1); }
+body > header nav ul { list-style-type: none; position: absolute; top: 75px; right: 0; margin: 0; padding: 0; z-index: 2; }
 body > header nav li { display: inline-block; margin: 0 3px; transition: left 0.5s, right 0.5s, top 0.5s; }
 body > header nav a:link, body > header nav a:visited, body > header nav button { background: #fff; color: #1fa67a; text-decoration: none; display: inline-block; width: 45px; height: 45px; border-radius: 25px; overflow: hidden; text-indent: 100px; position: relative; box-shadow: 1px 1px 5px #126349; transition: background 0.3s; }
 body > header nav a:hover, body > header nav button:hover { background: #e8f6f1; }
@@ -24,7 +26,7 @@ body > header nav li.secondary { height: 30px; }
 body > header nav li.secondary a, body > header nav li.secondary button { height: 30px; width: 30px; cursor: pointer; }
 body > header nav li.secondary a:before, body > header nav li.secondary button:before { line-height: 30px; }
 body > header nav li.secondary button { padding: 0; border: none; }
-body > header nav ul.page { top: 25px; right: -55px; }
+body > header nav ul.page { top: 125px; right: -55px; }
 body > header nav ul.page li { display: block; margin: 3px 0; height: 50px; }
 body > header nav ul.page li.secondary a, body > header nav ul.page li.secondary button { margin: 3px 8px; }
 body > header nav ul.page li.slide-in { overflow: hidden; }
