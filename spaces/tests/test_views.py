@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import Client, RequestFactory, TestCase
 
-from spaces.models import Space, Document, Revision
+from spaces.models import AccessLog, Space, Document, Revision
 from spaces import views
 
 
@@ -108,3 +108,13 @@ class RevisionViewTest(TestCase):
 
         self.assertFormError(
             response, "form", "path", "This path already exists")
+
+    def test_access_log(self):
+        """ An access log will be generated for every document view """
+        self.client.login(username="bob", password="noneofyourbusiness")
+        self.client.get(reverse('spaces:document', args=('mine/foo',)))
+
+        logs = AccessLog.objects.all()
+        self.assertEqual(logs.count(), 1)
+        self.assertEqual(logs[0].user.username, 'bob')
+        self.assertEqual(logs[0].document.path, 'foo')

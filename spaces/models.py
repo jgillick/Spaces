@@ -298,12 +298,12 @@ class Comment(models.Model):
 
 
 class AccessLog(models.Model):
-    """ An access log is generated every time a user views a document """
+
+    """ Tracks every time a user views a document. """
 
     document = models.ForeignKey('Document')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
     accessed_on = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return "accessed %s on %s" % (self.document.title, self.accessed_on)
-
