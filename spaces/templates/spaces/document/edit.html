@@ -14,9 +14,9 @@
     <a href="{% url 'spaces:document' path=request.resolver_match.kwargs.path %}" class="fa fa-ban" title="Cancel">
       Cancel</a>
   </li>
-  {% if document.id and not document.space_doc %}
+  {% if document.id and not document.is_space_root %}
     <li class="delete-document secondary slide-in">
-      <form action="{% url 'spaces:document_delete' document.id %}" method="POST">
+      <form action="{% url 'spaces:document_delete' document.id %}" id="delete-document-form" method="POST">
         {% csrf_token %}
         <button class="fa fa-trash-o" title="Delete" type="submit">
           Delete</button>

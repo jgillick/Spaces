@@ -57,14 +57,14 @@ class Space(models.Model):
             doc = Document.objects.get(
                 path="",
                 space=self,
-                space_doc=True,
+                is_space_root=True,
                 parent=None)
         except ObjectDoesNotExist:
             doc = Document.objects.create(
                 title=self.name,
                 path="",
                 space=self,
-                space_doc=True,
+                is_space_root=True,
                 parent=None
             )
 
@@ -91,7 +91,7 @@ class Document(models.Model):
 
     path = models.CharField(max_length=100, blank=True)
     title = models.CharField(max_length=100)
-    space_doc = models.BooleanField(
+    is_space_root = models.BooleanField(
         "Is this a space's root document",
         default=False)
     space = models.ForeignKey('Space')
@@ -190,16 +190,16 @@ class Document(models.Model):
             self._process_path(self.path)
 
         # Normalize path
-        elif not self.space_doc:
+        elif not self.is_space_root:
             self.path = to_slug(self.path)
 
         # Set no parent to root document
-        if self.parent is None and not self.space_doc:
+        if self.parent is None and not self.is_space_root:
             self.parent = self.space.get_root_document()
 
         # If we're a root level document, we can't have the
         # same path as the space. This is to cut down on confusion
-        if (not self.space_doc and self.parent.space_doc
+        if (not self.is_space_root and self.parent.is_space_root
                 and self.path.lower() == self.space.path.lower()):
             raise ValidationError(
                 "This document cannot have the same path name as it's space (%s)"
@@ -214,7 +214,7 @@ class Document(models.Model):
                     "Invalid username '%s'" % self.path)
 
         #  No hierarchy is allowed under the __ROOT__ space
-        if self.space.name == Space.ROOT_SPACE_NAME and not self.space_doc:
+        if self.space.name == Space.ROOT_SPACE_NAME and not self.is_space_root:
             raise ValidationError(
                 "Cannot put child pages under the root space")
 
@@ -244,7 +244,7 @@ class Document(models.Model):
                 d.save()
 
         # Cannot delete root space document
-        if self.space_doc:
+        if self.is_space_root:
             raise ValidationError(
                 "Cannot remove the root space document")
 
