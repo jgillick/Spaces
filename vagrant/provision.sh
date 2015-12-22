@@ -32,7 +32,7 @@ python manage.py migrate
 
 # Add super user
 echo "Create super user..."
-echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@localhost', 'password')" | python manage.py shell
+python ./manage.py shell --plain < /vagrant/vagrant/default_super_user.py
 
 #
 # Setup bash
@@ -58,4 +58,3 @@ fi
 
 chown vagrant $BASH_PROFILE $DJANGO_COMPLETE
 chmod 755 $DJANGO_COMPLETE
-
