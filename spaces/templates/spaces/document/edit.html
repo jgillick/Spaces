@@ -1,5 +1,7 @@
 {% extends "spaces/layout.html" %}
 
+{% load staticfiles %}
+
 {% block page_title %}{% block title %}Edit Document{% endblock %}{% endblock %}
 {% block page_classes %}
   document-form {% if document.id %}document-add{%else%}document-edit{%endif%}
@@ -35,11 +37,13 @@
     {% csrf_token %}
     {{ form.as_p }}
     {{ revision_form.as_p }}
-    <script language="javascript">
+    <script type="text/javascript">
         CKEDITOR.replace('id_revision_set-0-content');
     </script>
     <p>
       <button type="submit">Save</button>
     </p>
   </form>
+
+  <script type="text/javascript" src="{% static 'spaces/js/edit_doc.js' %}"></script>
 {% endblock %}
