@@ -1,29 +1,41 @@
 {% extends "spaces/layout.html" %}
 
 {% block page_title %}{% block title %}Edit Document{% endblock %}{% endblock %}
+{% block page_classes %}
+  document-form {% if document.id %}document-add{%else%}document-edit{%endif%}
+{% endblock %}
 
 {% block page_nav %}
-  <li class="form-action">
+  <li class="slide-in">
     <a href="#" class="fa fa-save" title="Save">
       Save</a>
   </li>
-  <li>
-    <a href="{% url 'spaces:document' path=document.full_path %}" class="fa fa-ban" title="Cancel">
-      Save</a>
+  <li class="slide-in">
+    <a href="{% url 'spaces:document' path=request.resolver_match.kwargs.path %}" class="fa fa-ban" title="Cancel">
+      Cancel</a>
   </li>
+  {% if document.id and not document.space_doc %}
+    <li class="delete-document secondary slide-in">
+      <form action="{% url 'spaces:document_delete' document.id %}" method="POST">
+        {% csrf_token %}
+        <button class="fa fa-trash-o" title="Delete" type="submit">
+          Delete</button>
+      </form>
+    </li>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
-  {% if document.id %}
-    Edit this document
-  {% else %}
-    Add new document
-  {% endif %}
-  <form action="{{ request.get_full_path }}" method="post">
+  <form action="{{ request.get_full_path }}" method="post" class="document-form">
+    {% if document.id %}
+      Edit this document
+    {% else %}
+      Add new document
+    {% endif %}
     {% csrf_token %}
     {{ form.as_p }}
     {{ revision_form.as_p }}
-    <script>
+    <script language="javascript">
         CKEDITOR.replace('id_revision_set-0-content');
     </script>
     <p>

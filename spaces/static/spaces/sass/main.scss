@@ -74,7 +74,9 @@ body > header {
       transition: left 0.5s, right 0.5s, top 0.5s;
     }
 
-    a:link {
+    a:link,
+    a:visited,
+    button {
       background: $header-fg;
       color: $nav-bnt-color;
 
@@ -89,12 +91,14 @@ body > header {
       box-shadow: 1px 1px 5px $nav-bnt-shadow-color;
       transition: background .3s
     }
-    a:hover {
+    a:hover,
+    button:hover {
       background: $nav-bnt-hover-color;
     }
 
     // Icon positioning
-    a:before {
+    a:before,
+    button:before {
       position: absolute;
       top: 0; bottom: 0;
       left: 0; right: 0;
@@ -117,20 +121,27 @@ body > header {
     li.secondary {
       height: 30px;
     }
-    li.secondary a:link,
-    li.secondary a:visited {
+    li.secondary a,
+    li.secondary button {
       height: 30px;
       width: 30px;
-      margin: 0 8px;
+      margin: 3px 8px;
+      cursor: pointer;
     }
-    li.secondary a:before {
+    li.secondary a:before,
+    li.secondary button:before {
       line-height: 30px;
     }
+    li.secondary button {
+      padding: 0;
+      border: none;
+    }
 
-    li.form-action {
+    li.slide-in {
       overflow: hidden;
 
-      a {
+      a,
+      button {
         position: absolute;
         right: 60px;
         transition: right 0.5s;
@@ -139,7 +150,8 @@ body > header {
   }
 }
 
-body.loaded > header ul.page li.form-action a {
+body.loaded > header ul.page li.slide-in a,
+body.loaded > header ul.page li.slide-in button {
   right: 0;
 }
 
@@ -186,3 +198,16 @@ article {
     border-top: 1px solid #e9e9e9;
   }
 }
+
+/*
+  ############
+  Document Form
+  ############
+*/
+.document-form {
+  nav .delete-document button:hover {
+    color: #fff;
+    background: #900;
+  }
+}
+
