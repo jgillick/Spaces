@@ -43,7 +43,11 @@
           {% if path.id != document.id %}
             <li>
               <a href="{% url 'spaces:document' path=path.full_path %}">
-                {{path.title}}</a>
+                {% if path.is_space_root %}
+                  {{path.space.name}}
+                {% else %}
+                  {{path.title}}
+                {% endif %}</a>
             </li>
           {% endif %}
         {% endfor %}
