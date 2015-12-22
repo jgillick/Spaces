@@ -1,12 +1,12 @@
 from django.views import generic
 
 from django.http import Http404, HttpResponseRedirect
-from django.contrib.auth import login, mixins
+from django.contrib.auth import login, mixins, get_user
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 
-from .models import Space, Document, Revision
+from .models import AccessLog, Space, Document, Revision
 from .forms import DocumentForm, RevisionInlineFormset
 
 
@@ -25,10 +25,36 @@ class DocView(generic.DetailView):
         return document
 
     def get_context_data(self, **kwargs):
+        document = self.get_object()
         context = super(DocView, self).get_context_data(**kwargs)
+
+        # General space list
         context["general_spaces"] = Space.objects.exclude(
             name__in=[Space.ROOT_SPACE_NAME, Space.USER_SPACE_NAME])
+
+        # Breadcrumbs
+        parent = document.parent
+        context["path_documents"] = []
+
+        if not document.is_space_root:
+            context["path_documents"].insert(0, document)
+
+        while parent is not None:
+            context["path_documents"].insert(0, parent)
+            parent = parent.parent
+
         return context
+
+    def get(self, request, *args, **kwargs):
+        document = self.get_object()
+
+        # Add access log
+        user = get_user(request)
+        if user.is_anonymous():
+            user = None
+        AccessLog.objects.create(document=document, user=user)
+
+        return super(DocView, self).get(request, *args, **kwargs)
 
 
 class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):

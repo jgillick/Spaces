@@ -38,6 +38,16 @@
             {{ document.latest.created_on|naturalday }}
           {% endif %}
         </p>
+        <ol class="breadcrumbs">
+        {% for path in path_documents %}
+          {% if path.id != document.id %}
+            <li>
+              <a href="{% url 'spaces:document' path=path.full_path %}">
+                {{path.title}}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+        </ol>
       </header>
 
       <div class="content">
@@ -52,35 +62,33 @@
         {% endif %}
       </div>
 
-      <footer>
-        {# Child Documents #}
-        {% if document.document_set.count %}
-          <section class="child-pages">
-            <h1>Child Documents</h1>
-            <ul>
-            {% for doc in document.document_set.all %}
-              <li>
-                <a href="{% url 'spaces:document' path=doc.full_path %}">{{doc.title}}</a>
-              </li>
-            {% endfor %}
-            </ul>
-          </section>
-        {% endif %}
+      {# Child Documents #}
+      {% if document.document_set.count %}
+        <footer class="child-pages">
+          <h1>Child Documents</h1>
+          <ul>
+          {% for doc in document.document_set.all %}
+            <li>
+              <a href="{% url 'spaces:document' path=doc.full_path %}">{{doc.title}}</a>
+            </li>
+          {% endfor %}
+          </ul>
+        </footer>
+      {% endif %}
 
-        {# List other spaces #}
-        {% if document.space.name == '__ROOT__' %}
-          <section class="general-spaces">
-            <h1>Spaces</h1>
-            <ul>
-            {% for space in general_spaces %}
-              <li>
-                <a href="{% url 'spaces:document' path=space.path %}">{{space.name}}</a>
-              </li>
-            {% endfor %}
-            </ul>
-          </section>
-        {% endif %}
-      </footer>
+      {# List other spaces #}
+      {% if document.space.name == '__ROOT__' %}
+        <footer class="general-spaces">
+          <h1>Spaces</h1>
+          <ul>
+          {% for space in general_spaces %}
+            <li>
+              <a href="{% url 'spaces:document' path=space.path %}">{{space.name}}</a>
+            </li>
+          {% endfor %}
+          </ul>
+        </footer>
+      {% endif %}
     {% else %}
       <header>
         <h1>No document here</h1>

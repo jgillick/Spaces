@@ -2,7 +2,9 @@ html, body { height: 100%; }
 
 body { font-family: 'Roboto Slab', 'Metrophobic', 'Helvetica Neue', Helvetica, Arial, serif; font-size: 18px; font-weight: 300; line-height: 1.65; background: #F9F7F3; margin: 0; padding: 0; }
 
-h1, h2, h3, h4, h5 { font-family: 'Roboto Condensed'; font-weight: 300; }
+h1, h2, h3, h4, h5 { font-family: 'Roboto Condensed'; font-weight: 300; margin: 7px 0; }
+
+h1 { font-size: 36px; }
 
 a:link, a:visited { color: #4078c0; text-decoration: none; }
 
@@ -10,9 +12,9 @@ a:hover { text-decoration: underline; }
 
 /* ############ Header and Main Navigation ############
 */
-body > header { position: relative; background: #1fa67a; color: #fff; min-height: 160px; padding: 20px 60px 0; margin: 0; }
+body > header { position: relative; background: #1fa67a; color: #fff; min-height: 180px; padding: 20px 60px 0; margin: 0; box-sizing: border-box; }
 body > header h1 { margin: 0; padding: 0; line-height: 80px; font-family: 'Roboto Slab'; }
-body > header nav { width: 840px; margin: 0 auto; position: relative; }
+body > header nav { width: 100%; max-width: 800px; margin: 0 auto; position: relative; }
 body > header nav ul { list-style-type: none; position: absolute; top: -32px; right: 0; margin: 0; padding: 0; }
 body > header nav li { display: inline-block; margin: 0 5px; transition: left 0.5s, right 0.5s, top 0.5s; }
 body > header nav a:link, body > header nav a:visited, body > header nav button { background: #fff; color: #1fa67a; text-decoration: none; display: inline-block; width: 45px; height: 45px; border-radius: 25px; overflow: hidden; text-indent: 100px; position: relative; box-shadow: 1px 1px 5px #126349; transition: background 0.3s; }
@@ -31,15 +33,19 @@ body.loaded > header ul.page li.slide-in a, body.loaded > header ul.page li.slid
 
 /* ############ Main Content Area ############
 */
-.main { position: relative; width: 800px; margin: -60px auto 0; background: #fff; padding: 10px 20px 10px; box-shadow: 1px 1px 5px #AAA; }
+.main { position: relative; width: 90%; max-width: 800px; margin: -60px auto 0; background: #fff; padding: 10px 20px 10px; box-shadow: 1px 1px 5px #AAA; box-sizing: border-box; }
 
 /* ############ Document ############
 */
-article > header { margin: 15px 0; border-bottom: 1px solid #e9e9e9; }
+article > header { margin: 0; padding: 0 0 5px; border-bottom: 1px solid #e9e9e9; }
 article > header h1 { margin: 0; }
 article > header p.meta { font-size: 14px; color: #999; margin: 0; font-family: 'Roboto'; font-weight: 200; }
-article .content { padding: 20px 0; }
-article footer { font-size: 14px; border-top: 1px solid #e9e9e9; }
+article > header .breadcrumbs { position: absolute; top: -1.7em; left: 0; right: 0; height: 1.5em; overflow: hidden; font-family: Roboto; font-size: 12px; color: #fff; list-style-type: none; }
+article > header .breadcrumbs li { display: inline-block; }
+article > header .breadcrumbs li:after { content: "/"; }
+article > header .breadcrumbs a:link, article > header .breadcrumbs a:visited { color: #fff; }
+article .content { padding: 15px 0 25px; }
+article footer { padding: 15px 0; font-size: 14px; border-top: 1px solid #e9e9e9; }
 article footer h1 { font-size: 18px; }
 
 /* ############ Document Form ############
