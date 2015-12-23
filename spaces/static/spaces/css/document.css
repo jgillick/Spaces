@@ -1,0 +1,7 @@
+/** Styles for the inside document
+*/
+.document-view article .content h1 { font-size: 36px; font-weight: bold; }
+.document-view article .content h2 { font-size: 28px; font-weight: bold; border-bottom: 1px solid #eee; }
+.document-view article .content h3 { font-size: 24px; font-weight: bold; }
+
+/*# sourceMappingURL=document.css.map */
