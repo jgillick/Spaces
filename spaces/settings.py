@@ -12,5 +12,7 @@ RESERVED_ROOT_URLS = [
     'manage',
     '_add_',
     '_edit_',
-    '_delete_'
+    '_delete_',
+    '_info_',
+    '_revision_'
 ]
