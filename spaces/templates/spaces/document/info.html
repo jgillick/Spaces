@@ -1,0 +1,62 @@
+{% extends "spaces/layout.html" %}
+{% load humanize %}
+
+{% block page_title %}{% block title %}Revisions - {{document.title}}{% endblock %}{% endblock %}
+{% block page_classes %}document-info{% endblock %}
+
+{% block page_nav %}
+  {% if document %}
+    <li>
+      <a href="{% url 'spaces:document_edit' path=document.full_path %}" class="fa fa-pencil fa" title="Edit">
+        Edit</a>
+    </li>
+    <li class="secondary">
+      <a href="{% url 'spaces:document' path=document.full_path %}" class="fa fa-file-text-o fa" title="View Document">
+        View</a>
+    </li>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+  <section>
+    <h1>Revisions: {{document.title}}</h1>
+
+    {% if document.revision_set.count %}
+      <table>
+        <thead>
+          <tr>
+            <th>Author</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for rev in document.revision_set.all %}
+          <tr>
+            <td>
+              <a href="{% url 'spaces:document_revision' rev.id %}">
+                {{ rev.author }}</a>
+            </td>
+            <td>
+              <a href="{% url 'spaces:document_revision' rev.id %}">
+                {{ rev.created_on|naturaltime }}
+                {% if rev.id == rev.doc.latest.id %}
+                  <em>(latest)</em>
+                {% endif %}
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>
+        No revisions yet.
+        <a href="{% url 'spaces:document_edit' path=document.full_path %}">
+          add</a>
+        some content!
+      </p>
+    {% endif %}
+  </section>
+
+{% endblock %}

@@ -9,20 +9,20 @@ from django.core.exceptions import (
 from django.core.urlresolvers import reverse
 from django.db import models
 
-from .managers import DocumentManager, SpaceManager
+from .managers import DocumentManager, RevisionQuerySet, SpaceManager
 from .utils import normalize_path, to_slug
 
 
 class Space(models.Model):
 
+    """
+    A general Space.
+    """
+
     ROOT_SPACE_NAME = '__ROOT__'
     USER_SPACE_NAME = '__USER__'
 
     objects = SpaceManager()
-
-    """
-    A general Space.
-    """
 
     name = models.CharField(max_length=100, unique=True)
     path = models.CharField(max_length=40, unique=True)
@@ -270,6 +270,8 @@ class Revision(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL) #editable=False
     content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
+
+    objects = RevisionQuerySet()
 
     def __unicode__(self):
         return "created on %s by %s" % (self.created_on, self.author.username)

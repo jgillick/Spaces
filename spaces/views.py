@@ -6,14 +6,15 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 
-from .models import AccessLog, Space, Document, Revision
+from .models import AccessLog, Document, Revision, Space
 from .forms import DocumentForm, RevisionInlineFormset
 
 
-class DocView(generic.DetailView):
+class GenericDocView(generic.DetailView):
 
-    """ View a document. """
+    """ Generic view for document details """
 
+    rev = None
     model = Document
     template_name = 'spaces/document/view.html'
 
@@ -26,7 +27,15 @@ class DocView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         document = self.get_object()
-        context = super(DocView, self).get_context_data(**kwargs)
+        context = super(GenericDocView, self).get_context_data(**kwargs)
+
+        # Document version
+        if self.rev:
+            context["revision"] = self.rev
+            context["is_latest"] = (self.rev.id == document.latest().id)
+        else:
+            context["revision"] = document.latest()
+            context["is_latest"] = True
 
         # General space list
         context["general_spaces"] = Space.objects.exclude(
@@ -45,19 +54,32 @@ class DocView(generic.DetailView):
 
         return context
 
+
+class DocDetailView(GenericDocView):
+
+    """ Display the document. """
+
     def get(self, request, *args, **kwargs):
+        """ Add an access log for every view. """
         document = self.get_object()
+        user = get_user(request)
 
         # Add access log
-        user = get_user(request)
         if user.is_anonymous():
             user = None
         AccessLog.objects.create(document=document, user=user)
 
-        return super(DocView, self).get(request, *args, **kwargs)
+        return super(DocDetailView, self).get(request, *args, **kwargs)
 
 
-class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
+class DocInfoView(GenericDocView):
+
+    """ Show info and revisions for this document """
+
+    template_name = 'spaces/document/info.html'
+
+
+class DocCreateView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
 
     """ Create a new document """
 
@@ -72,7 +94,7 @@ class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
 
     def get_form_kwargs(self):
         """ Add user to the kwargs sent to DocumentForm """
-        kwargs = super(DocCreate, self).get_form_kwargs()
+        kwargs = super(DocCreateView, self).get_form_kwargs()
         kwargs["user"] = self.user
         return kwargs
 
@@ -135,7 +157,7 @@ class DocCreate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
                                   revision_form=revision_form))
 
 
-class DocUpdate(DocCreate):
+class DocUpdateView(DocCreateView):
 
     """ Edit a document. """
 
@@ -147,7 +169,7 @@ class DocUpdate(DocCreate):
             raise Http404
 
 
-class DocDelete(generic.edit.DeleteView):
+class DocDeleteView(generic.edit.DeleteView):
 
     """ Delete a document. """
 
@@ -161,7 +183,20 @@ class DocDelete(generic.edit.DeleteView):
             'spaces:document',
             kwargs={"path": object.parent.full_path()})
 
-        return super(DocDelete, self).post(request, *args, **kwargs)
+        return super(DocDeleteView, self).post(request, *args, **kwargs)
+
+
+class RevisionView(GenericDocView):
+
+    """ View a specific document revision. """
+
+    def get_object(self):
+        try:
+            self.rev = Revision.objects.get(pk=self.kwargs["pk"])
+        except ObjectDoesNotExist:
+            raise Http404
+
+        return self.rev.doc
 
 
 class LoginView(generic.edit.FormView):

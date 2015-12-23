@@ -61,7 +61,7 @@ class RevisionViewTest(TestCase):
             reverse('spaces:document_create', kwargs={"path": path}),
             data)
         request.user = self.author
-        return views.DocUpdate.as_view()(request, path=path)
+        return views.DocUpdateView.as_view()(request, path=path)
 
     def test_correct_revisions_is_shown(self):
         """ The latest revision should be shown for a document. """

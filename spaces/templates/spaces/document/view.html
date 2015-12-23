@@ -2,6 +2,7 @@
 {% load humanize %}
 
 {% block page_title %}{% block title %}{{document.title}}{% endblock %}{% endblock %}
+{% block page_classes %}document-view{% endblock %}
 
 {% block page_nav %}
   {% if document %}
@@ -10,7 +11,8 @@
         Edit</a>
     </li>
     <li class="secondary">
-      <a href="./_info" class="fa fa-info fa" title="Edit">Edit</a>
+      <a href="{% url 'spaces:document_info' path=document.full_path %}" class="fa fa-info fa" title="Document Info">
+        Info</a>
     </li>
   {% endif %}
 {% endblock %}
@@ -28,16 +30,24 @@
           {% endif %}
         </h1>
         <p class="meta">
-          {% if document.latest %}
+          {% if revision %}
             {% if document.revision_set.count == 1 %}
               Created by
             {% else %}
               Modified by
             {% endif %}
-            {{document.latest.author.username }}
-            {{ document.latest.created_on|naturalday }}
+            {{ revision.author.username }}
+            {{ revision.created_on|naturaltime }}
           {% endif %}
         </p>
+        {% if not is_latest %}
+          <p class="revision-warning">
+            <strong>Warning:</strong>
+            This is not the latest revision of this document.
+            <a href="{% url 'spaces:document' path=document.full_path %}">View</a>
+            the latest.
+          <p>
+        {% endif %}
         <ol class="breadcrumbs">
         {% for path in path_documents %}
           {% if path.id != document.id %}
@@ -55,8 +65,8 @@
       </header>
 
       <div class="content">
-        {% if document.latest %}
-          {{ document.latest.content|safe }}
+        {% if revision %}
+          {{ revision.content|safe }}
         {% else %}
           <p>
             Nothing here yet,

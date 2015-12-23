@@ -17,7 +17,7 @@ html, body {
 }
 
 body {
-  font-family: 'Roboto Slab', 'Metrophobic', 'Helvetica Neue', Helvetica, Arial, serif;
+  font-family: 'Roboto Slab', 'Helvetica Neue', Helvetica, Arial, serif;
   font-size: 18px;
   font-weight: 300;
   line-height: 1.65;
@@ -233,6 +233,11 @@ article {
       font-family: 'Roboto';
       font-weight: 200;
     }
+    p.revision-warning {
+      font-size: 14px;
+      margin: 5px 0;
+      color: #900;
+    }
   }
   > header .breadcrumbs {
     position: absolute;
@@ -261,8 +266,8 @@ article {
   }
 
   .content {
-    padding: 15px 0 25px;
-    font-family: "Helvetica Neue", Helvetica;
+    margin: 10px 0 25px;
+    font-family: "Open Sans", "Helvetica Neue", Helvetica;
   }
   footer {
     padding: 15px 0;
@@ -272,6 +277,52 @@ article {
     h1 {
       font-size: 18px;
     }
+  }
+}
+
+/*
+  ############
+  Document Info
+  ############
+*/
+.document-info {
+  table {
+    width: 80%;
+    border: 1px solid #bbb;
+    border-collapse: collapse;
+    margin: 10px 0 20px;
+  }
+  th, td a {
+    padding: 5px 15px;
+  }
+  th {
+    font-weight: normal;
+    text-align: left;
+    font-family: 'Roboto Condensed';
+    background: #ccc;
+    border-bottom: 1px solid #bbb;
+  }
+  td {
+    border-bottom: 1px solid #bbb;
+  }
+  tr:last-child td {
+    border: none;
+  }
+  td a:link,
+  td a:visited {
+    display: block;
+    color: inherit;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+  td a em {
+    font-size: 14px;
+    color: #666;
+  }
+  tr:hover td {
+    background: #eee;
   }
 }
 

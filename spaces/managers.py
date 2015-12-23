@@ -9,6 +9,7 @@ from .utils import normalize_path
 
 
 class SpaceManager(models.Manager):
+
     """ Custom space queryset object """
 
     def get_by_path(self, path):
@@ -32,6 +33,7 @@ class SpaceManager(models.Manager):
 
 
 class DocumentManager(models.Manager):
+
     """ Custom document queryset object """
 
     def get_by_path(self, path, space=None, create=False):
@@ -83,3 +85,8 @@ class DocumentManager(models.Manager):
                             "Document at %s does not exist" % curPath)
 
         return doc
+
+
+class RevisionQuerySet(models.Manager):
+    def all(self):
+        return self.get_queryset().order_by('-created_on')
