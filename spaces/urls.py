@@ -3,6 +3,16 @@ from . import views
 
 app_name = 'spaces'
 urlpatterns = [
+
+    # API Views
+
+    url(
+        r'^api/v1/document/(?P<path>.*)$',
+        views.DocumentDetailAPI.as_view()),
+
+
+    # Web Views
+
     url(r'^s/account/login$', views.LoginView.as_view(), name='login'),
 
     url(
