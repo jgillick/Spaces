@@ -25,11 +25,16 @@ class DocumentSerializer(serializers.ModelSerializer):
     )
     parent = serializers.SlugRelatedField(
         read_only=True,
-        slug_field='path'
+        slug_field='full_path_property'
     )
     latest = RevisionSerializer(read_only=True)
     revision_set = serializers.PrimaryKeyRelatedField(
-        many=True, read_only=True)
+        many=True,
+        read_only=True)
+    children = serializers.SlugRelatedField(
+        many=True,
+        slug_field='path',
+        read_only=True)
 
     class Meta:
         model = Document
@@ -40,5 +45,6 @@ class DocumentSerializer(serializers.ModelSerializer):
             'space',
             'parent',
             'latest',
-            'revision_set'
+            'revision_set',
+            'children'
         )

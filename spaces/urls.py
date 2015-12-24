@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from . import views
+from . import views, api_views
 
 app_name = 'spaces'
 urlpatterns = [
@@ -7,8 +7,14 @@ urlpatterns = [
     # API Views
 
     url(
-        r'^api/v1/document/(?P<path>.*)$',
-        views.DocumentDetailAPI.as_view()),
+        r'^api/v1/spaces/$',
+        api_views.SpaceList.as_view()),
+    url(
+        r'^api/v1/spaces/(?P<path>.*)$',
+        api_views.SpaceDetail.as_view()),
+    url(
+        r'^api/v1/documents/(?P<path>.*)$',
+        api_views.DocumentDetail.as_view()),
 
 
     # Web Views

@@ -6,11 +6,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 
-from rest_framework import generics
-
 from .models import AccessLog, Document, Revision, Space
 from .forms import DocumentForm, RevisionInlineFormset
-from .serializers import DocumentSerializer
 
 
 class GenericDocView(generic.DetailView):
@@ -70,7 +67,8 @@ class DocDetailView(GenericDocView):
         # Add access log
         if user.is_anonymous():
             user = None
-        AccessLog.objects.create(document=document, user=user)
+        if document:
+            AccessLog.objects.create(document=document, user=user)
 
         return super(DocDetailView, self).get(request, *args, **kwargs)
 
@@ -181,18 +179,6 @@ class DocDeleteView(generic.edit.DeleteView):
             kwargs={"path": object.parent.full_path()})
 
         return super(DocDeleteView, self).post(request, *args, **kwargs)
-
-
-class DocumentDetailAPI(generics.RetrieveAPIView):
-    queryset = Document.objects.all()
-    serializer_class = DocumentSerializer
-
-    def get_object(self):
-        try:
-            doc = Document.objects.get_by_path(self.kwargs["path"])
-            return doc
-        except ObjectDoesNotExist:
-            raise Http404
 
 
 class RevisionView(GenericDocView):

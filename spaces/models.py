@@ -143,6 +143,16 @@ class Document(models.Model):
 
         return uri
 
+    @property
+    def full_path_property(self):
+        """ Purely for the API serializer """
+        return self.full_path()
+
+    @property
+    def children(self):
+        """ Convenience alias """
+        return self.document_set
+
     def get_absolute_url(self):
         """ Get the absolute URL route to the document. """
         return reverse('spaces:document', kwargs={'path': self.full_path()})
