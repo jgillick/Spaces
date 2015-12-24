@@ -4,7 +4,7 @@
 
 {% block page_title %}{% block title %}Edit Document{% endblock %}{% endblock %}
 {% block page_classes %}
-  document-form {% if document.id %}document-add{%else%}document-edit{%endif%}
+  document-form {% if document.id %}document-edit{%else%}document-add{%endif%}
 {% endblock %}
 
 {% block page_nav %}
@@ -112,5 +112,8 @@
     </p>
   </form>
 
+  <script type="text/javascript">
+    var DOC_API = '{% url "spaces:api_document" path="" %}';
+  </script>
   <script type="text/javascript" src="{% static 'spaces/js/edit_doc.js' %}"></script>
 {% endblock %}
