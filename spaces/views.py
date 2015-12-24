@@ -101,7 +101,7 @@ class DocCreateView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
     def _setup_forms(self, request, post=None):
         self.user = request.user
         self.object = self.get_object()
-        rev_qs = self.object.revision_set.order_by('-created_on')
+        rev_qs = self.object.revision_set.all()
 
         if rev_qs.count():
             rev_qs = rev_qs.filter(pk=rev_qs[0].pk)
@@ -124,15 +124,9 @@ class DocCreateView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
 
     def post(self, request, *args, **kwargs):
         """ Handle POST requests. """
-        self.user = request.user
-        self.object = self.get_object()
 
-        # Parent is defined by path
-        self.object.parent = None
-
-        form = self.get_form(self.get_form_class())
-        revision_form = RevisionInlineFormset(
-            request.POST, instance=self.object, user=self.user)
+        form, revision_form = self._setup_forms(request, request.POST)
+        self.object.parent = None  # Parent is defined by path
 
         if (form.is_valid() and revision_form.is_valid()):
             return self.form_valid(form, revision_form)
