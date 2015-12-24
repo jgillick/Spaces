@@ -32,9 +32,9 @@ class GenericDocView(generic.DetailView):
         # Document version
         if self.rev:
             context["revision"] = self.rev
-            context["is_latest"] = (self.rev.id == document.latest().id)
+            context["is_latest"] = (self.rev.id == document.latest.id)
         else:
-            context["revision"] = document.latest()
+            context["revision"] = document.latest
             context["is_latest"] = True
 
         # General space list

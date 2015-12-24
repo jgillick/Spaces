@@ -290,7 +290,7 @@ class RevisionTestCase(TestCase):
 
     def test_correct_revision(self):
         """ A document should always reference the latest revision """
-        self.assertEqual(self.doc.latest().content, 'Sed dignissim lacinia nunc.')
+        self.assertEqual(self.doc.latest.content, 'Sed dignissim lacinia nunc.')
 
     def test_save_no_change_same_rev(self):
         """
@@ -298,7 +298,7 @@ class RevisionTestCase(TestCase):
         it does not create a new one
         """
         initialRevCount = self.doc.revision_set.count()
-        self.doc.latest().save()
+        self.doc.latest.save()
         self.assertEqual(self.doc.revision_set.count(), initialRevCount)
 
     def test_delete_revisions(self):

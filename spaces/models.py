@@ -115,6 +115,7 @@ class Document(models.Model):
     def __unicode__(self):
         return self.title
 
+    @property
     def latest(self):
         """ Get the latest revision """
         return self.revision_set.order_by('-id').first()
@@ -280,7 +281,7 @@ class Revision(models.Model):
         self.full_clean()
 
         # If it's the same content as the current revision, don't save
-        latestContent = self.doc.latest()
+        latestContent = self.doc.latest
         if latestContent and latestContent.content == self.content:
             return
 
