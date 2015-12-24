@@ -1,0 +1,17 @@
+
+{% if path_documents %}
+  <ol class="breadcrumbs">
+  {% for path in path_documents %}
+    {% if path.id != document.id or inc_current %}
+      <li class="{% if path.id == document.id %}current-doc{% endif %}">
+        <a href="{% url 'spaces:document' path=path.full_path %}">
+          {% if path.is_space_root %}
+            {{path.space.name}}
+          {% else %}
+            {{path.title}}
+          {% endif %}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+  </ol>
+{% endif %}

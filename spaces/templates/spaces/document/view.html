@@ -48,20 +48,7 @@
             the latest.
           <p>
         {% endif %}
-        <ol class="breadcrumbs">
-        {% for path in path_documents %}
-          {% if path.id != document.id %}
-            <li>
-              <a href="{% url 'spaces:document' path=path.full_path %}">
-                {% if path.is_space_root %}
-                  {{path.space.name}}
-                {% else %}
-                  {{path.title}}
-                {% endif %}</a>
-            </li>
-          {% endif %}
-        {% endfor %}
-        </ol>
+        {% include "spaces/include/breadcrumbs.html" %}
       </header>
 
       <div class="content">

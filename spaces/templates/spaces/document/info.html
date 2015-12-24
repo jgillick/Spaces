@@ -20,7 +20,10 @@
 {% block content %}
 
   <section>
-    <h1>Revisions: {{document.title}}</h1>
+    <header>
+      <h1>Revisions: {{document.title}}</h1>
+      {% include "spaces/include/breadcrumbs.html" with inc_current=True %}
+    </header>
 
     {% if document.revision_set.count %}
       <table>
