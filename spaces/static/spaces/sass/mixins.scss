@@ -1,0 +1,7 @@
+
+// Hide an element off screen, for accessibility
+@mixin hide-offscreen {
+  position: absolute;
+  left: -1234em;
+  top: -1234em;
+}

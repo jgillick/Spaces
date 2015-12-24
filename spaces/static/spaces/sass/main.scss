@@ -12,6 +12,8 @@ $nav-bnt-shadow-color: #126349;
 $page-bg: #F9F7F3; // #eee
 $content-bg: #fff;
 
+@import './mixins';
+
 html, body {
   height: 100%;
 }
@@ -161,6 +163,7 @@ body > header {
   nav ul.page {
     top: 125px;
     right: -55px;
+    z-index: 0;
 
     li {
       display: block;
@@ -211,6 +214,37 @@ body > footer {
   margin: 30px 0 30px;
   font-size: 14px;
 }
+.main article,
+.main section {
+  > header .breadcrumbs {
+    position: absolute;
+    top: -1.7em;
+    left: 0;
+    right: 0;
+    height: 1.5em;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    font-family: Roboto;
+    font-size: 12px;
+    color: #fff;
+    list-style-type: none;
+
+    li {
+      display: inline-block;
+    }
+    li:after {
+      content: '/';
+    }
+    li.current-doc:after {
+      content: '';
+    }
+    a:link,
+    a:visited {
+      color: #fff;
+    }
+  }
+}
 
 /*
   ############
@@ -237,31 +271,6 @@ article {
       font-size: 14px;
       margin: 5px 0;
       color: #900;
-    }
-  }
-  > header .breadcrumbs {
-    position: absolute;
-    top: -1.7em;
-    left: 0;
-    right: 0;
-    height: 1.5em;
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-    font-family: Roboto;
-    font-size: 12px;
-    color: #fff;
-    list-style-type: none;
-
-    li {
-      display: inline-block;
-    }
-    li:after {
-      content: '/'
-    }
-    a:link,
-    a:visited {
-      color: #fff;
     }
   }
 
@@ -332,9 +341,112 @@ article {
   ############
 */
 .document-form {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica;
+
   nav .delete-document button:hover {
     color: #fff;
     background: #900;
+  }
+
+  h1 {
+    margin: 5px 0;
+  }
+
+  .main form {
+
+    ol {
+      position: relative;
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+    li {
+      margin: 10px 0;
+      padding: 0;
+      position: relative;
+      width: 100%;
+    }
+    label {
+      @include hide-offscreen;
+    }
+    input,
+    .cke {
+      box-sizing: border-box;
+    }
+
+    .errorlist {
+      display: block;
+      list-style-type: none;
+      color: #900;
+      margin: 0 0 3px 0;
+      padding: 0;
+      font-size: 14px;
+
+      li {
+        margin: 0;
+      }
+    }
+    li.has-error {
+      border-left: 3px solid #B00;
+      padding-left: 10px;
+      margin-left: -12px;
+    }
+  }
+
+  .title-field {
+    input {
+      font-size: 36px;
+      display: block;
+      width: 100%;
+    }
+  }
+  .location-fields {
+    font-size: 16px;
+
+    .fields {
+      display: flex;
+
+      > span {
+        display: inline-block;
+      }
+    }
+
+    input, select {
+      font-size: inherit;
+    }
+
+    .path-field {
+      flex: 1;
+      margin-left: 5px;
+
+      input {
+        width: 100%;
+      }
+    }
+    .space-name {
+      color: #666;
+    }
+    .space-field:after {
+      content: '/';
+      color: #666;
+    }
+  }
+  .content-field {
+    margin: 15px 0;
+  }
+
+  .actions {
+    font-size: 14px;
+    text-align: center;
+    margin: 20px 0;
+
+    .primary {
+      font-size: 18px;
+      padding: 5px 20px;
+      margin: 0 5px 0 0;
+      vertical-align: bottom;
+    }
   }
 }
 

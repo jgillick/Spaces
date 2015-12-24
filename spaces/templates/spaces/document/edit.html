@@ -28,20 +28,87 @@
 {% endblock %}
 
 {% block content %}
-  <form action="{{ request.get_full_path }}" method="post" class="document-form">
-    {% if document.id %}
-      Edit this document
-    {% else %}
-      Add new document
-    {% endif %}
+  <form action="{{ request.get_full_path }}" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    {{ revision_form.as_p }}
-    <script type="text/javascript">
-        CKEDITOR.replace('id_revision_set-0-content');
-    </script>
-    <p>
-      <button type="submit">Save</button>
+
+    {{ revision_form.management_form }}
+    {% for hidden in form.hidden_fields %}
+      {{ hidden }}
+    {% endfor %}
+
+    <h1>
+      {% if not document.id %}
+        Add new document
+      {% endif %}
+    </h1>
+
+    <div class="form-errors">
+      {{ form.non_field_errors }}
+      {{ revision_form.non_field_errors }}
+    </div>
+
+    <ol>
+      <li class="title-field {% if form.title.errors %}has-error{% endif %}">
+        {{ form.title.errors }}
+        <div class="field placeholder-label">
+          {{ form.title.label_tag }}
+          {{ form.title }}
+        </div>
+      </li>
+
+      {% if not document.is_space_root %}
+        <li class="
+          location-fields
+          {% if form.space.errors or form.path.errors %}has-error{% endif %}
+        ">
+
+          {{ form.space.errors }}
+          {{ form.path.errors }}
+          <span class="fields">
+            <span class="space-field">
+              {% if document.id %}
+                <span class="space-name">
+                  {{ document.space.name }}
+                </span>
+              {% else %}
+                {{ form.space.label_tag }}
+                {{ form.space }}
+              {% endif %}
+            </span>
+            <span class="path-field">
+              {{ form.path.label_tag }}
+              {{ form.path }}
+            </span>
+          </span>
+        </li>
+      {% endif %}
+      <li class="content-field">
+        {% for hidden in revision_form.hidden_fields %}
+          {{ hidden }}
+        {% endfor %}
+
+        {% for rev_form in revision_form %}
+          {% for hidden in rev_form.hidden_fields %}
+            {{ hidden }}
+          {% endfor %}
+
+          {{ rev_form.content.errors }}
+          {{ rev_form.content.label_tag }}
+          {{ rev_form.content }}
+          <script type="text/javascript">
+              CKEDITOR.replace('{{ rev_form.content.id_for_label }}', {
+                width: '100%',
+                height: 500
+              });
+          </script>
+
+        {% endfor %}
+      </li>
+    </ol>
+    <p class="actions">
+      <button type="submit" class="primary">Save</button>
+      <a href="{% url 'spaces:document' path=request.resolver_match.kwargs.path %}">
+        Cancel</a>
     </p>
   </form>
 
