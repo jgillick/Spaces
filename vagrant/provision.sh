@@ -25,6 +25,7 @@ mysql -u root -e "GRANT ALL PRIVILEGES ON test_spaces.* TO 'spaceman'@'localhost
 
 # Python libs
 pip install django mysql-python bpython
+pip install -r /vagrant/spaces/requirements.txt
 
 # Run migrations
 cd /vagrant/
