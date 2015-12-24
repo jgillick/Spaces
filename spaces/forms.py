@@ -35,7 +35,9 @@ class DocumentForm(forms.ModelForm):
             else obj.name
 
         # Set default path and remove double slashes
-        self.initial["path"] = self.instance.full_path(inc_space=False) + "/"
+        self.initial["path"] = self.instance.full_path(inc_space=False)
+        if not self.instance.pk:
+            self.initial["path"] += '/'
         self.initial["path"] = re.sub(r'/+', '/', self.initial["path"])
 
     def clean_path(self):
