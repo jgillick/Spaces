@@ -144,9 +144,14 @@ class Document(models.Model):
         return uri
 
     @property
-    def full_path_property(self):
-        """ Purely for the API serializer """
+    def full_path_with_space(self):
+        """ full_path wrapper property for templates and API serializer. """
         return self.full_path()
+
+    @property
+    def full_path_without_space(self):
+        """ full_path wrapper property for templates and API serializer. """
+        return self.full_path(False)
 
     @property
     def children(self):

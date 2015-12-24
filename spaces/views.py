@@ -121,11 +121,13 @@ class DocCreateView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
         form, revision_form = self._setup_forms(request)
 
         return self.render_to_response(
-            self.get_context_data(form=form, revision_form=revision_form))
+            self.get_context_data(
+                base_path=self.get_object().full_path(False),
+                form=form,
+                revision_form=revision_form))
 
     def post(self, request, *args, **kwargs):
         """ Handle POST requests. """
-
         form, revision_form = self._setup_forms(request, request.POST)
         self.object.parent = None  # Parent is defined by path
 
@@ -147,9 +149,12 @@ class DocCreateView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
         Called if a form is invalid. Re-renders the context data with the
         data-filled forms and errors.
         """
+
         return self.render_to_response(
-            self.get_context_data(form=form,
-                                  revision_form=revision_form))
+            self.get_context_data(
+                base_path=self.get_object().full_path(False),
+                form=form,
+                revision_form=revision_form))
 
 
 class DocUpdateView(DocCreateView):

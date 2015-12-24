@@ -65,8 +65,8 @@
         path = pathField.val(),
         slug;
 
-    // Don't generate path if the user has already modified it
-    if (initial != path && generatedPath != path) {
+    // Don't generate path if the user has already modified the path
+    if (BASE_PATH != path.replace(/\/$/, '') && generatedPath != path) {
       return;
     }
 

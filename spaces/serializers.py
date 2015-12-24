@@ -25,7 +25,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     )
     parent = serializers.SlugRelatedField(
         read_only=True,
-        slug_field='full_path_property'
+        slug_field='full_path_with_space'
     )
     latest = RevisionSerializer(read_only=True)
     revision_set = serializers.PrimaryKeyRelatedField(

@@ -114,6 +114,7 @@
 
   <script type="text/javascript">
     var DOC_API = '{% url "spaces:api_document" path="" %}';
+    var BASE_PATH = '{{ base_path }}';
   </script>
   <script type="text/javascript" src="{% static 'spaces/js/edit_doc.js' %}"></script>
 {% endblock %}
