@@ -7,6 +7,7 @@ class ViewPermissionRequiredMixin(PermissionRequiredMixin):
 
     """ Ensure the user has access to view a document. """
 
+    raise_exception = True
     permission_required = 'spaces.view_document'
 
     def dispatch(self, request, *args, **kwargs):
@@ -20,6 +21,7 @@ class EditPermissionRequiredMixin(PermissionRequiredMixin):
 
     """ Ensure the user has access to edit a document. """
 
+    raise_exception = True
     permission_required = ('spaces.add_document', 'spaces.change_document')
 
     def dispatch(self, request, *args, **kwargs):
@@ -34,4 +36,5 @@ class DeletePermissionRequiredMixin(EditPermissionRequiredMixin):
 
     """ Ensure the user has access to delete a document. """
 
+    raise_exception = True
     permission_required = 'spaces.delete_document'
