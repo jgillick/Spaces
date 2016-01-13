@@ -55,11 +55,25 @@
         {% if revision %}
           {{ revision.content|safe }}
         {% else %}
-          <p>
-            Nothing here yet,
-            <a href="{% url 'spaces:document_edit' path=request.resolver_match.kwargs.path %}">add</a>
-            some content!
-          </p>
+          {% if document.is_space_root and document.space.name == document.space.ROOT_SPACE_NAME %}
+            Finish setting things up:
+            <ol>
+              <li>
+                Create some <a href="{% url 'admin:spaces_space_changelist' %}">spaces</a>.
+              </li>
+              <li>Tweak the configurations.</li>
+              <li>
+                <a href="{% url 'spaces:document_edit' path=request.resolver_match.kwargs.path %}">Edit</a>
+                the content of this page.
+              </li>
+            </ol>
+          {% else %}
+            <p>
+              Nothing here yet,
+              <a href="{% url 'spaces:document_edit' path=request.resolver_match.kwargs.path %}">add</a>
+              some content!
+            </p>
+          {% endif %}
         {% endif %}
       </div>
 
