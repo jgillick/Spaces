@@ -45,6 +45,35 @@ a:hover {
   text-decoration: underline;
 }
 
+// Form defaults
+form {
+  padding: 20px 0;
+
+  ol {
+    list-style-type: none;
+    padding: 0 0 10px 0;
+    margin: 0;
+  }
+  ol > li {
+    margin: 5px 0;
+  }
+  label {
+    display: block;
+    font-weight: 300;
+  }
+  input, button {
+    font-size: 18px;
+    font-weight: 200;
+  }
+
+  .errorlist {
+    list-style-type: none;
+    padding: 0 0 10px;
+    margin: 0;
+    color: #900;
+  }
+}
+
 /*
   ############
   Header and Main Navigation
@@ -213,6 +242,11 @@ body > footer {
   text-align: center;
   margin: 30px 0 30px;
   font-size: 14px;
+
+  p {
+    margin: 3px 0;
+    font-size: 12px;
+  }
 }
 .main article,
 .main section {

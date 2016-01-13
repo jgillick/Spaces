@@ -56,8 +56,16 @@
     {% block content %}{% endblock %}
   </div>
   <footer>
-    Site powered by
-    <a href="https://github.com/jgillick/Spaces" target="_blank">Spaces</a>.
+    {% if user.is_authenticated %}
+      <p class="logout">
+        <a href="{% url 'spaces:logout' %}">
+          Logout</a>
+      </p>
+    {% endif %}
+    <p>
+      Site powered by
+      <a href="https://github.com/jgillick/Spaces" target="_blank">Spaces</a>.
+    </p>
   </footer>
 </body>
 </html>

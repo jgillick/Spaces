@@ -296,7 +296,7 @@ class Revision(models.Model):
         self.full_clean()
 
         # If it's the same content as the current revision, don't save
-        latestContent = self.doc.latest()
+        latestContent = self.doc.latest
         if latestContent and latestContent.content == self.content:
             return
 

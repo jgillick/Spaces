@@ -4,8 +4,14 @@
 
 {% block content %}
 
-  <form method="post" action="{% url 'spaces:login' %}">
+  <form method="post" action="{% url 'spaces:login' %}" id="login-form">
     {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}" />
+
+    <div class="form-errors">
+      {{ form.non_field_errors }}
+    </div>
+
     <ol>
       <li>
         {{ form.username.label_tag }}
@@ -17,8 +23,7 @@
       </li>
     </ol>
 
-    <input type="submit" value="login" />
-    <input type="hidden" name="next" value="{{ next }}" />
+    <button type="submit">Login</button>
   </form>
 
 

@@ -46,16 +46,16 @@ class GenericDocView(generic.DetailView):
             name__in=[Space.ROOT_SPACE_NAME, Space.USER_SPACE_NAME])
 
         # Breadcrumbs
+        context["path_documents"] = []
         if document:
             parent = document.parent
-        context["path_documents"] = []
 
-        if not document.is_space_root:
-            context["path_documents"].insert(0, document)
+            if not document.is_space_root:
+                context["path_documents"].insert(0, document)
 
-        while parent is not None:
-            context["path_documents"].insert(0, parent)
-            parent = parent.parent
+            while parent is not None:
+                context["path_documents"].insert(0, parent)
+                parent = parent.parent
 
         return context
 
