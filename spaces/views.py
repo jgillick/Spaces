@@ -8,11 +8,15 @@ from django.core.urlresolvers import reverse
 
 from .models import AccessLog, Document, Revision, Space
 from .forms import DocumentForm, RevisionInlineFormset
+from .mixins import (
+    DeletePermissionRequiredMixin,
+    EditPermissionRequiredMixin,
+    ViewPermissionRequiredMixin)
 
 
 class GenericDocView(generic.DetailView):
 
-    """ Generic view for document details """
+    """ Generic view for document details. """
 
     rev = None
     model = Document
@@ -33,7 +37,7 @@ class GenericDocView(generic.DetailView):
         if self.rev:
             context["revision"] = self.rev
             context["is_latest"] = (self.rev.id == document.latest.id)
-        else:
+        elif document:
             context["revision"] = document.latest
             context["is_latest"] = True
 
@@ -42,7 +46,8 @@ class GenericDocView(generic.DetailView):
             name__in=[Space.ROOT_SPACE_NAME, Space.USER_SPACE_NAME])
 
         # Breadcrumbs
-        parent = document.parent
+        if document:
+            parent = document.parent
         context["path_documents"] = []
 
         if not document.is_space_root:
@@ -55,7 +60,7 @@ class GenericDocView(generic.DetailView):
         return context
 
 
-class DocDetailView(GenericDocView):
+class DocDetailView(ViewPermissionRequiredMixin, GenericDocView):
 
     """ Display the document. """
 
@@ -73,14 +78,14 @@ class DocDetailView(GenericDocView):
         return super(DocDetailView, self).get(request, *args, **kwargs)
 
 
-class DocInfoView(GenericDocView):
+class DocInfoView(ViewPermissionRequiredMixin, GenericDocView):
 
     """ Show info and revisions for this document """
 
     template_name = 'spaces/document/info.html'
 
 
-class DocCreateView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
+class DocCreateView(EditPermissionRequiredMixin, generic.edit.UpdateView):
 
     """ Create a new document """
 
@@ -169,7 +174,7 @@ class DocUpdateView(DocCreateView):
             raise Http404
 
 
-class DocDeleteView(generic.edit.DeleteView):
+class DocDeleteView(DeletePermissionRequiredMixin, generic.edit.DeleteView):
 
     """ Delete a document. """
 
