@@ -27,16 +27,11 @@
     <div class="wrapper">
       <h1>
         <a href="{% url 'spaces:document' path='' %}">
-          Spaces</a>
+          {{ site_name }}</a>
       </h1>
       <nav>
         <ul class="global">
-          {% if user.is_authenticated %}
-            <li class="secondary">
-              <a href="#" class="fa fa-cog" title="Management">
-                Manage</a>
-            </li>
-          {% else %}
+          {% if not user.is_authenticated %}
             <li class="secondary">
               <a href="{% url 'spaces:login' %}" class="fa fa-sign-in" title="Login">
                 Login</a>
