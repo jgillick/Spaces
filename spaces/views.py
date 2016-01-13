@@ -50,7 +50,7 @@ class GenericDocView(generic.DetailView):
         if document:
             parent = document.parent
 
-            if not document.is_space_root:
+            if not (document.is_space_root and document.space.name == Space.ROOT_SPACE_NAME):
                 context["path_documents"].insert(0, document)
 
             while parent is not None:
