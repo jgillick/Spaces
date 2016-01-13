@@ -19,7 +19,7 @@ CKEDITOR.editorConfig = function( config ) {
 		// { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
 		{ name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule' ] },
 		{ name: 'document', items: [ 'Source' ] },
-		{ name: 'markdown', items: [ 'Markdown' ] }
+		// { name: 'markdown', items: [ 'Markdown' ] }
 	];
 
 
@@ -33,5 +33,13 @@ CKEDITOR.editorConfig = function( config ) {
 	// Simplify the dialog windows.
 	config.removeDialogTabs = 'image:advanced;link:advanced';
 
-	config.extraPlugins = 'markdown';
+	config.extraPlugins = 'dragresize,dropler'; //markdown
+
+	// Drag/drop upload
+	config.droplerConfig = {
+    backend: 'basic',
+    settings: {
+    	uploadUrl: window.UPLOAD_URL
+    }
+  }
 };

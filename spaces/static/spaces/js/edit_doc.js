@@ -6,20 +6,6 @@
       pathField = $('form .path-field input');
 
   /**
-    Checks if a path currently exists.
-  */
-  function pathExists(path) {
-    $.GET(DOC_API + path)
-    .then(
-    function() {
-      console.log('Exists!')
-    },
-    function() {
-      console.log('Does not exist')
-    });
-  }
-
-  /**
     Create a url slug for a string
   */
   function toSlug(value) {

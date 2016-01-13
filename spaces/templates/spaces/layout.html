@@ -4,6 +4,10 @@
 <head>
   <title>{% block title %}{% endblock %}</title>
 
+  <script>
+    UPLOAD_URL = "{% url 'spaces:file_upload' %}";
+  </script>
+
   {# Fonts #}
   <link href='//fonts.googleapis.com/css?family=Roboto:400,100,300|Roboto+Slab:400,100,300|Roboto+Condensed:400,300|Open+Sans:400normal|Raleway:400normal' rel='stylesheet' type='text/css'  />
 

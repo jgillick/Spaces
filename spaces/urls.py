@@ -28,7 +28,7 @@ urlpatterns = [
         r'^s/logout$', 'django.contrib.auth.views.logout',
         {'next_page': 'spaces:root'}, name='logout'),
 
-    url(r's/upload', views.file_upload_view, name='upload'),
+    url(r's/upload', views.file_upload_view, name='file_upload'),
 
     # Document views
     url(r'^$', views.DocDetailView.as_view(), {'path': ''}, name='root'),
