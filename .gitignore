@@ -5,6 +5,7 @@ media/*
 
 # SCSS
 *.css.map
+.sass-cache/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
