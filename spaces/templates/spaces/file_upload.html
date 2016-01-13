@@ -1,0 +1,15 @@
+{% extends "spaces/layout.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<form method="post" action="./upload" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{form.as_p}}
+  <p>
+    <button type="submit">Upload</button>
+  </p>
+</form>
+
+{% endblock %}

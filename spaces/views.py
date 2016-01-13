@@ -1,13 +1,16 @@
 from django.views import generic
 
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
 from django.contrib.auth import login, mixins, get_user
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
+from django.views.decorators.csrf import csrf_exempt
 
+from .utils import upload_file
 from .models import AccessLog, Document, Revision, Space
-from .forms import DocumentForm, RevisionInlineFormset
+from .forms import DocumentForm, RevisionInlineFormset, UploadFileForm
 from .mixins import (
     DeletePermissionRequiredMixin,
     EditPermissionRequiredMixin,
@@ -215,3 +218,15 @@ class LoginView(generic.edit.FormView):
         self.success_url = reverse('spaces:document', kwargs={"path": ""})
         login(self.request, form.get_user())
         return super(LoginView, self).form_valid(form)
+
+
+@csrf_exempt
+def file_upload_view(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            path = upload_file(request.FILES['file'])
+            return JsonResponse({'link': path})
+    else:
+        form = UploadFileForm()
+    return render(request, 'spaces/file_upload.html', {'form': form})

@@ -81,6 +81,9 @@ class RevisionFormset(BaseInlineFormSet):
                     form.instance.author = self.author
 
 
+class UploadFileForm(forms.Form):
+    file = forms.FileField()
+
 RevisionInlineFormset = inlineformset_factory(
     Document,
     Revision,

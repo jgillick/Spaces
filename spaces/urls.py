@@ -7,18 +7,18 @@ urlpatterns = [
     #
     # API Views
     #
-    url(
-        r'^api/v1/spaces/$',
-        api_views.SpaceList.as_view(),
-        name='api_spaces'),
-    url(
-        r'^api/v1/spaces/(?P<path>.*)$',
-        api_views.SpaceDetail.as_view(),
-        name='api_space'),
-    url(
-        r'^api/v1/documents/(?P<path>.*)$',
-        api_views.DocumentDetail.as_view(),
-        name='api_document'),
+    # url(
+    #     r'^api/v1/spaces/$',
+    #     api_views.SpaceList.as_view(),
+    #     name='api_spaces'),
+    # url(
+    #     r'^api/v1/spaces/(?P<path>.*)$',
+    #     api_views.SpaceDetail.as_view(),
+    #     name='api_space'),
+    # url(
+    #     r'^api/v1/documents/(?P<path>.*)$',
+    #     api_views.DocumentDetail.as_view(),
+    #     name='api_document'),
 
     #
     # Web Views
@@ -28,9 +28,10 @@ urlpatterns = [
         r'^s/logout$', 'django.contrib.auth.views.logout',
         {'next_page': 'spaces:root'}, name='logout'),
 
+    url(r's/upload', views.file_upload_view, name='upload'),
+
     # Document views
-    url(r'^$',
-        views.DocDetailView.as_view(), {'path': ''}, name='root'),
+    url(r'^$', views.DocDetailView.as_view(), {'path': ''}, name='root'),
 
     url(r'^_edit_/(?P<path>.*)?$',
         views.DocUpdateView.as_view(), name='document_edit'),

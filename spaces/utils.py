@@ -1,6 +1,10 @@
 
 import re
 import os
+import uuid
+
+from datetime import date
+from django.conf import settings
 
 
 def normalize_path(path):
@@ -35,3 +39,27 @@ def to_slug(value):
     value = re.sub(r'(^\-)|(\-$)', '', value)
 
     return value
+
+
+def upload_file(f):
+    """ Upload a file and return the URL to it. """
+
+    # Create path under media root
+    name, ext = os.path.splitext(f.name)
+    name = "%s%s" % (str(uuid.uuid4()), ext)
+
+    path = date.today().strftime("%Y")
+
+    # Create base directory
+    filepath = os.path.join(settings.MEDIA_ROOT, path)
+    if not os.path.exists(filepath):
+        os.makedirs(filepath)
+
+    # Write file
+    filepath = os.path.join(filepath, name)
+    with open(filepath, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
+    # Return URL
+    return os.path.join(settings.MEDIA_URL, path, name)
