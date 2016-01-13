@@ -60,8 +60,13 @@ class Space(models.Model):
                 is_space_root=True,
                 parent=None)
         except ObjectDoesNotExist:
+            title = self.name
+
+            if title == Space.ROOT_SPACE_NAME:
+                title = "Welcome to Spaces"
+
             doc = Document.objects.create(
-                title=self.name,
+                title=title,
                 path="",
                 space=self,
                 is_space_root=True,
